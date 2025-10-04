@@ -11,11 +11,12 @@ interface ConditionalLayoutProps {
 export function ConditionalLayout({ children }: ConditionalLayoutProps) {
   const pathname = usePathname();
 
-  // Check if we're on an auth page
+  // Check if we're on an auth or dashboard page
   const isAuthPage = pathname?.startsWith("/auth");
+  const isDashboardPage = pathname?.startsWith("/dashboard");
 
-  if (isAuthPage) {
-    // For auth pages, render children directly (no navbar/footer)
+  if (isAuthPage || isDashboardPage) {
+    // For auth and dashboard pages, render children directly (they have their own layouts)
     return <>{children}</>;
   }
 

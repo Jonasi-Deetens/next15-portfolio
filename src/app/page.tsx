@@ -2,7 +2,8 @@
 
 import { trpc } from "@/lib/trpc-client";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import {
   Card,
@@ -16,6 +17,14 @@ import Link from "next/link";
 
 export default function Home() {
   const { data: session, status } = useSession();
+  const router = useRouter();
+
+  // Redirect authenticated users to dashboard
+  useEffect(() => {
+    if (status === "authenticated" && session) {
+      router.push("/dashboard");
+    }
+  }, [status, session, router]);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
