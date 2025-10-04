@@ -12,6 +12,9 @@ import {
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Alert, AlertDescription } from "@/components/ui/Alert";
+import { Badge } from "@/components/ui/Badge";
+import { Avatar } from "@/components/ui/Avatar";
+import { User, Mail, Lock, Bell, Moon, CheckCircle } from "lucide-react";
 
 export default function SettingsPage() {
   const { data: session } = useSession();
@@ -42,40 +45,49 @@ export default function SettingsPage() {
         {/* Profile Settings */}
         <Card>
           <CardHeader>
-            <CardTitle>Profile Information</CardTitle>
-            <CardDescription>
-              Update your account profile information
-            </CardDescription>
+            <div className="flex items-center gap-4">
+              <Avatar
+                src={session?.user?.image}
+                fallback={session?.user?.name || "U"}
+                alt={session?.user?.name || "User"}
+                size="xl"
+              />
+              <div>
+                <CardTitle>Profile Information</CardTitle>
+                <CardDescription>
+                  Update your account profile information
+                </CardDescription>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSave} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Name
-                </label>
-                <Input
-                  type="text"
-                  defaultValue={session?.user?.name || ""}
-                  placeholder="Your name"
-                />
-              </div>
+              <Input
+                type="text"
+                label="Name"
+                defaultValue={session?.user?.name || ""}
+                placeholder="Your name"
+                icon={<User className="h-4 w-4" />}
+              />
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
-                </label>
                 <Input
                   type="email"
+                  label="Email"
                   defaultValue={session?.user?.email || ""}
                   placeholder="your@email.com"
+                  icon={<Mail className="h-4 w-4" />}
                   disabled
                 />
-                <p className="mt-1 text-xs text-gray-500">
+                <p className="mt-1 text-xs text-muted-foreground">
                   Email cannot be changed
                 </p>
               </div>
 
-              <Button type="submit">Save Changes</Button>
+              <Button type="submit">
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Save Changes
+              </Button>
             </form>
           </CardContent>
         </Card>
@@ -83,33 +95,39 @@ export default function SettingsPage() {
         {/* Password Settings */}
         <Card>
           <CardHeader>
-            <CardTitle>Password</CardTitle>
+            <CardTitle>
+              <Lock className="w-5 h-5 inline mr-2" />
+              Password
+            </CardTitle>
             <CardDescription>Change your password</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSave} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Current Password
-                </label>
-                <Input type="password" placeholder="••••••••" />
-              </div>
+              <Input
+                type="password"
+                label="Current Password"
+                placeholder="••••••••"
+                icon={<Lock className="h-4 w-4" />}
+              />
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  New Password
-                </label>
-                <Input type="password" placeholder="••••••••" />
-              </div>
+              <Input
+                type="password"
+                label="New Password"
+                placeholder="••••••••"
+                icon={<Lock className="h-4 w-4" />}
+              />
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Confirm New Password
-                </label>
-                <Input type="password" placeholder="••••••••" />
-              </div>
+              <Input
+                type="password"
+                label="Confirm New Password"
+                placeholder="••••••••"
+                icon={<Lock className="h-4 w-4" />}
+              />
 
-              <Button type="submit">Update Password</Button>
+              <Button type="submit">
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Update Password
+              </Button>
             </form>
           </CardContent>
         </Card>
@@ -122,31 +140,37 @@ export default function SettingsPage() {
               Manage your application preferences
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-gray-900">Email Notifications</p>
-                <p className="text-sm text-gray-500">
-                  Receive email updates about your account
-                </p>
+          <CardContent className="space-y-6">
+            <div className="flex items-center justify-between p-4 rounded-lg border">
+              <div className="flex items-start gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100">
+                  <Bell className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900">
+                    Email Notifications
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Receive email updates about your account
+                  </p>
+                </div>
               </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" className="sr-only peer" />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-              </label>
+              <Badge variant="success">Enabled</Badge>
             </div>
 
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-gray-900">Dark Mode</p>
-                <p className="text-sm text-gray-500">
-                  Use dark theme for the interface
-                </p>
+            <div className="flex items-center justify-between p-4 rounded-lg border">
+              <div className="flex items-start gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-purple-100">
+                  <Moon className="w-5 h-5 text-purple-600" />
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900">Dark Mode</p>
+                  <p className="text-sm text-muted-foreground">
+                    Use dark theme for the interface
+                  </p>
+                </div>
               </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" className="sr-only peer" />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-              </label>
+              <Badge variant="default">Coming Soon</Badge>
             </div>
           </CardContent>
         </Card>

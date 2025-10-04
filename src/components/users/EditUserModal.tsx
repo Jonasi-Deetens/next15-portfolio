@@ -1,11 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc-client";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
 import { Alert, AlertDescription } from "@/components/ui/Alert";
+import { Formik, Form } from "formik";
+import * as Yup from "yup";
+import { FormikInput } from "@/components/ui/FormikInput";
+import { FormikSelect } from "@/components/ui/FormikSelect";
+import { User, Mail, Shield, Info } from "lucide-react";
 
 interface EditUserModalProps {
   open: boolean;
@@ -14,69 +17,72 @@ interface EditUserModalProps {
   onSuccess: () => void;
 }
 
+const editUserSchema = Yup.object({
+  name: Yup.string()
+    .min(2, "Name must be at least 2 characters")
+    .required("Name is required"),
+  email: Yup.string()
+    .email("Please enter a valid email address")
+    .required("Email is required"),
+  role: Yup.string()
+    .oneOf(["USER", "ADMIN", "SUPER_ADMIN"])
+    .required("Role is required"),
+});
+
+interface EditUserForm {
+  name: string;
+  email: string;
+  role: "USER" | "ADMIN" | "SUPER_ADMIN";
+}
+
+const roleOptions = [
+  { value: "USER", label: "User" },
+  { value: "ADMIN", label: "Admin" },
+  { value: "SUPER_ADMIN", label: "Super Admin" },
+];
+
 export function EditUserModal({
   open,
   user,
   onClose,
   onSuccess,
 }: EditUserModalProps) {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    role: "USER" as "USER" | "ADMIN" | "SUPER_ADMIN",
-  });
-  const [error, setError] = useState<string | null>(null);
+  const updateUser = trpc.user.updateUser.useMutation();
+  const updateRole = trpc.user.updateRole.useMutation();
 
-  useEffect(() => {
-    if (user) {
-      setFormData({
-        name: user.name || "",
-        email: user.email || "",
-        role: user.role || "USER",
-      });
-    }
-  }, [user]);
+  const initialValues: EditUserForm = {
+    name: user?.name || "",
+    email: user?.email || "",
+    role: user?.role || "USER",
+  };
 
-  const updateUser = trpc.user.updateUser.useMutation({
-    onSuccess: () => {
-      setError(null);
+  const handleSubmit = async (
+    values: EditUserForm,
+    { setSubmitting, setFieldError }: any
+  ) => {
+    try {
+      // Update basic info if changed
+      if (values.name !== user.name || values.email !== user.email) {
+        await updateUser.mutateAsync({
+          userId: user.id,
+          name: values.name,
+          email: values.email,
+        });
+      }
+
+      // Update role if changed
+      if (values.role !== user.role) {
+        await updateRole.mutateAsync({
+          userId: user.id,
+          role: values.role,
+        });
+      }
+
       onSuccess();
-    },
-    onError: (err) => {
-      setError(err.message);
-    },
-  });
-
-  const updateRole = trpc.user.updateRole.useMutation({
-    onSuccess: () => {
-      setError(null);
-      onSuccess();
-    },
-    onError: (err) => {
-      setError(err.message);
-    },
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name || !formData.email) {
-      setError("Name and email are required");
-      return;
-    }
-
-    // Update basic info
-    updateUser.mutate({
-      userId: user.id,
-      name: formData.name,
-      email: formData.email,
-    });
-
-    // Update role if changed
-    if (formData.role !== user.role) {
-      updateRole.mutate({
-        userId: user.id,
-        role: formData.role,
-      });
+    } catch (error: any) {
+      setFieldError("email", error.message || "Failed to update user");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -87,93 +93,83 @@ export function EditUserModal({
       title="Edit User"
       description="Update user information and permissions"
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {error && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
+      <Formik
+        initialValues={initialValues}
+        validationSchema={editUserSchema}
+        onSubmit={handleSubmit}
+        enableReinitialize
+      >
+        {({ isSubmitting }) => (
+          <Form className="space-y-4">
+            {(updateUser.isError || updateRole.isError) && (
+              <Alert variant="destructive">
+                <AlertDescription>
+                  {updateUser.error?.message ||
+                    updateRole.error?.message ||
+                    "Failed to update user"}
+                </AlertDescription>
+              </Alert>
+            )}
+
+            <FormikInput
+              name="name"
+              type="text"
+              label="Name"
+              placeholder="John Doe"
+              icon={<User className="h-4 w-4" />}
+              disabled={isSubmitting}
+            />
+
+            <FormikInput
+              name="email"
+              type="email"
+              label="Email"
+              placeholder="john@example.com"
+              icon={<Mail className="h-4 w-4" />}
+              disabled={isSubmitting}
+            />
+
+            <div>
+              <FormikSelect
+                name="role"
+                label="Role"
+                icon={<Shield className="h-4 w-4" />}
+                options={roleOptions}
+                disabled={isSubmitting}
+              />
+              <p className="mt-1 text-xs text-muted-foreground">
+                Admins have access to user management and settings
+              </p>
+            </div>
+
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                <strong>Current Status:</strong> {user?.status}
+                <br />
+                <span className="text-xs">
+                  Use the status buttons on the main page to change user status
+                </span>
+              </AlertDescription>
+            </Alert>
+
+            <div className="flex gap-3 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                className="flex-1"
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" loading={isSubmitting} className="flex-1">
+                Save Changes
+              </Button>
+            </div>
+          </Form>
         )}
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Name
-          </label>
-          <Input
-            type="text"
-            value={formData.name}
-            onChange={(e) =>
-              setFormData({ ...formData, name: e.target.value })
-            }
-            placeholder="John Doe"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Email
-          </label>
-          <Input
-            type="email"
-            value={formData.email}
-            onChange={(e) =>
-              setFormData({ ...formData, email: e.target.value })
-            }
-            placeholder="john@example.com"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Role
-          </label>
-          <select
-            value={formData.role}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                role: e.target.value as "USER" | "ADMIN" | "SUPER_ADMIN",
-              })
-            }
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="USER">User</option>
-            <option value="ADMIN">Admin</option>
-            <option value="SUPER_ADMIN">Super Admin</option>
-          </select>
-          <p className="mt-1 text-xs text-gray-500">
-            Admins have access to user management and settings
-          </p>
-        </div>
-
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-          <p className="text-sm text-blue-800">
-            <strong>Current Status:</strong> {user?.status}
-          </p>
-          <p className="text-xs text-blue-600 mt-1">
-            Use the status buttons on the main page to change user status
-          </p>
-        </div>
-
-        <div className="flex gap-3 pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onClose}
-            className="flex-1"
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            loading={updateUser.isPending || updateRole.isPending}
-            className="flex-1"
-          >
-            Save Changes
-          </Button>
-        </div>
-      </form>
+      </Formik>
     </Modal>
   );
 }

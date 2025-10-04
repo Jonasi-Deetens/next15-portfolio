@@ -9,16 +9,31 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/Card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/Table";
 import { Button } from "@/components/ui/Button";
 import { Alert, AlertDescription } from "@/components/ui/Alert";
+import { Badge } from "@/components/ui/Badge";
+import { Avatar } from "@/components/ui/Avatar";
+import { StatCard } from "@/components/ui/StatCard";
 import {
-  UserPlusIcon,
-  PencilIcon,
-  TrashIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  ShieldCheckIcon,
-} from "@heroicons/react/24/outline";
+  UserPlus,
+  Users,
+  UserCheck,
+  Shield,
+  UserX,
+  Edit2,
+  Trash2,
+  CheckCircle,
+  XCircle,
+  ShieldCheck,
+} from "lucide-react";
 import { CreateUserModal } from "@/components/users/CreateUserModal";
 import { EditUserModal } from "@/components/users/EditUserModal";
 
@@ -60,29 +75,31 @@ export default function UsersPage() {
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusBadgeVariant = (
+    status: string
+  ): "success" | "default" | "danger" => {
     switch (status) {
       case "ACTIVE":
-        return "text-green-700 bg-green-50";
+        return "success";
       case "INACTIVE":
-        return "text-gray-700 bg-gray-50";
+        return "default";
       case "SUSPENDED":
-        return "text-red-700 bg-red-50";
+        return "danger";
       default:
-        return "text-gray-700 bg-gray-50";
+        return "default";
     }
   };
 
-  const getRoleBadgeColor = (role: string) => {
+  const getRoleBadgeVariant = (
+    role: string
+  ): "secondary" | "info" | "default" => {
     switch (role) {
       case "SUPER_ADMIN":
-        return "text-purple-700 bg-purple-50";
+        return "secondary";
       case "ADMIN":
-        return "text-blue-700 bg-blue-50";
-      case "USER":
-        return "text-gray-700 bg-gray-50";
+        return "info";
       default:
-        return "text-gray-700 bg-gray-50";
+        return "default";
     }
   };
 
@@ -96,7 +113,7 @@ export default function UsersPage() {
           </p>
         </div>
         <Button onClick={() => setCreateModalOpen(true)}>
-          <UserPlusIcon className="w-5 h-5 mr-2" />
+          <UserPlus className="w-5 h-5 mr-2" />
           Create User
         </Button>
       </div>
@@ -109,38 +126,30 @@ export default function UsersPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-gray-900">
-              {stats?.total || 0}
-            </div>
-            <p className="text-sm text-gray-600">Total Users</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-green-600">
-              {stats?.active || 0}
-            </div>
-            <p className="text-sm text-gray-600">Active Users</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-blue-600">
-              {stats?.admins || 0}
-            </div>
-            <p className="text-sm text-gray-600">Administrators</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-red-600">
-              {stats?.suspended || 0}
-            </div>
-            <p className="text-sm text-gray-600">Suspended</p>
-          </CardContent>
-        </Card>
+        <StatCard
+          title="Total Users"
+          value={stats?.total || 0}
+          icon={<Users className="w-6 h-6" />}
+          variant="default"
+        />
+        <StatCard
+          title="Active Users"
+          value={stats?.active || 0}
+          icon={<UserCheck className="w-6 h-6" />}
+          variant="success"
+        />
+        <StatCard
+          title="Administrators"
+          value={stats?.admins || 0}
+          icon={<Shield className="w-6 h-6" />}
+          variant="primary"
+        />
+        <StatCard
+          title="Suspended"
+          value={stats?.suspended || 0}
+          icon={<UserX className="w-6 h-6" />}
+          variant="danger"
+        />
       </div>
 
       {/* Users Table */}
@@ -153,133 +162,120 @@ export default function UsersPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">
-                    User
-                  </th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">
-                    Role
-                  </th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">
-                    Status
-                  </th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">
-                    Apps
-                  </th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">
-                    Joined
-                  </th>
-                  <th className="px-4 py-3 text-right text-sm font-medium text-gray-900">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {users?.map((user) => (
-                  <tr key={user.id} className="border-b hover:bg-gray-50">
-                    <td className="px-4 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
-                          {user.name?.charAt(0).toUpperCase() || "U"}
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>User</TableHead>
+                <TableHead>Role</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Apps</TableHead>
+                <TableHead>Joined</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {users?.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <Avatar
+                        src={user.image}
+                        fallback={user.name || "U"}
+                        alt={user.name || "User"}
+                      />
+                      <div>
+                        <div className="font-medium text-gray-900">
+                          {user.name}
                         </div>
-                        <div>
-                          <div className="font-medium text-gray-900">
-                            {user.name}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {user.email}
-                          </div>
+                        <div className="text-sm text-muted-foreground">
+                          {user.email}
                         </div>
                       </div>
-                    </td>
-                    <td className="px-4 py-4">
-                      <span
-                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${getRoleBadgeColor(
-                          user.role
-                        )}`}
-                      >
-                        {user.role === "SUPER_ADMIN" ||
-                        user.role === "ADMIN" ? (
-                          <ShieldCheckIcon className="w-3 h-3" />
-                        ) : null}
-                        {user.role.replace("_", " ")}
-                      </span>
-                    </td>
-                    <td className="px-4 py-4">
-                      <span
-                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
-                          user.status
-                        )}`}
-                      >
-                        {user.status === "ACTIVE" ? (
-                          <CheckCircleIcon className="w-3 h-3" />
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={getRoleBadgeVariant(user.role)}
+                      icon={
+                        user.role !== "USER" ? (
+                          <ShieldCheck className="w-3 h-3" />
+                        ) : undefined
+                      }
+                    >
+                      {user.role.replace("_", " ")}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={getStatusBadgeVariant(user.status)}
+                      icon={
+                        user.status === "ACTIVE" ? (
+                          <CheckCircle className="w-3 h-3" />
                         ) : (
-                          <XCircleIcon className="w-3 h-3" />
-                        )}
-                        {user.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-4 text-sm text-gray-900">
-                      {user.installedApps?.length || 0}
-                    </td>
-                    <td className="px-4 py-4 text-sm text-gray-500">
-                      {new Date(user.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="flex items-center justify-end gap-2">
+                          <XCircle className="w-3 h-3" />
+                        )
+                      }
+                    >
+                      {user.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-sm text-gray-900">
+                    {user.installedApps?.length || 0}
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {new Date(user.createdAt).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center justify-end gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setEditUser(user)}
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </Button>
+                      {user.status === "ACTIVE" ? (
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => setEditUser(user)}
-                        >
-                          <PencilIcon className="w-4 h-4" />
-                        </Button>
-                        {user.status === "ACTIVE" ? (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() =>
-                              updateStatus.mutate({
-                                userId: user.id,
-                                status: "SUSPENDED",
-                              })
-                            }
-                          >
-                            Suspend
-                          </Button>
-                        ) : (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() =>
-                              updateStatus.mutate({
-                                userId: user.id,
-                                status: "ACTIVE",
-                              })
-                            }
-                          >
-                            Activate
-                          </Button>
-                        )}
-                        <Button
-                          size="sm"
-                          variant="destructive"
                           onClick={() =>
-                            handleDelete(user.id, user.name || "this user")
+                            updateStatus.mutate({
+                              userId: user.id,
+                              status: "SUSPENDED",
+                            })
                           }
                         >
-                          <TrashIcon className="w-4 h-4" />
+                          Suspend
                         </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() =>
+                            updateStatus.mutate({
+                              userId: user.id,
+                              status: "ACTIVE",
+                            })
+                          }
+                        >
+                          Activate
+                        </Button>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() =>
+                          handleDelete(user.id, user.name || "this user")
+                        }
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
 

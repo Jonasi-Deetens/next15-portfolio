@@ -8,7 +8,8 @@ import {
   CardTitle,
 } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { CubeIcon } from "@heroicons/react/24/outline";
+import { Badge } from "@/components/ui/Badge";
+import { Cube, Download, Check } from "lucide-react";
 
 const availableApps = [
   {
@@ -70,11 +71,13 @@ export default function AppsPage() {
         </h2>
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
-            <CubeIcon className="w-12 h-12 text-gray-400 mb-4" />
-            <p className="text-gray-600 text-center">
-              You haven't installed any apps yet.
+            <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
+              <Cube className="w-8 h-8 text-gray-400" />
+            </div>
+            <p className="text-gray-900 font-medium text-center">
+              No apps installed yet
             </p>
-            <p className="text-sm text-gray-500 text-center mt-1">
+            <p className="text-sm text-muted-foreground text-center mt-1">
               Browse the marketplace below to get started.
             </p>
           </CardContent>
@@ -88,29 +91,42 @@ export default function AppsPage() {
         </h2>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {availableApps.map((app) => (
-            <Card key={app.id} className="hover:shadow-lg transition-shadow">
+            <Card
+              key={app.id}
+              className="hover:shadow-lg transition-all hover:border-primary/50"
+            >
               <CardHeader>
-                <div className="flex items-start justify-between">
+                <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
-                    <div className="text-3xl">{app.icon}</div>
+                    <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 text-2xl">
+                      {app.icon}
+                    </div>
                     <div>
                       <CardTitle className="text-lg">
                         {app.displayName}
                       </CardTitle>
-                      <p className="text-xs text-gray-500">{app.category}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant="default">{app.category}</Badge>
+                        <span className="text-xs text-muted-foreground">
+                          v{app.version}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
-                <CardDescription className="mt-2">
-                  {app.description}
-                </CardDescription>
+                <CardDescription>{app.description}</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-500">v{app.version}</span>
-                  <Button size="sm" disabled>
+                <div className="flex items-center gap-2">
+                  <Button size="sm" disabled className="flex-1">
+                    <Download className="w-4 h-4 mr-2" />
                     Install
                   </Button>
+                  {app.isInstalled && (
+                    <Badge variant="success">
+                      <Check className="w-3 h-3" />
+                    </Badge>
+                  )}
                 </div>
               </CardContent>
             </Card>

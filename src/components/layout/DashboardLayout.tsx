@@ -4,26 +4,27 @@ import { ReactNode, useState } from "react";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { Avatar } from "@/components/ui/Avatar";
 import {
-  HomeIcon,
-  UserGroupIcon,
-  CubeIcon,
-  Cog6ToothIcon,
-  Bars3Icon,
-  XMarkIcon,
-  ChartBarIcon,
-} from "@heroicons/react/24/outline";
+  Home,
+  Users,
+  Cube,
+  Settings,
+  Menu,
+  X,
+  TrendingUp,
+} from "lucide-react";
 
 interface DashboardLayoutProps {
   children: ReactNode;
 }
 
 const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: HomeIcon },
-  { name: "Apps", href: "/dashboard/apps", icon: CubeIcon },
-  { name: "Users", href: "/dashboard/users", icon: UserGroupIcon, adminOnly: true },
-  { name: "Analytics", href: "/dashboard/analytics", icon: ChartBarIcon },
-  { name: "Settings", href: "/dashboard/settings", icon: Cog6ToothIcon },
+  { name: "Dashboard", href: "/dashboard", icon: Home },
+  { name: "Apps", href: "/dashboard/apps", icon: Cube },
+  { name: "Users", href: "/dashboard/users", icon: Users, adminOnly: true },
+  { name: "Analytics", href: "/dashboard/analytics", icon: TrendingUp },
+  { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
@@ -61,7 +62,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             onClick={() => setSidebarOpen(false)}
             className="text-gray-500 hover:text-gray-700"
           >
-            <XMarkIcon className="w-6 h-6" />
+            <X className="w-6 h-6" />
           </button>
         </div>
         <nav className="px-4 py-6 space-y-1">
@@ -117,14 +118,16 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           {/* User info at bottom */}
           <div className="p-4 border-t">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
-                {session?.user?.name?.charAt(0).toUpperCase() || "U"}
-              </div>
+              <Avatar
+                src={session?.user?.image}
+                fallback={session?.user?.name || "U"}
+                alt={session?.user?.name || "User"}
+              />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">
                   {session?.user?.name || "User"}
                 </p>
-                <p className="text-xs text-gray-500 truncate">
+                <p className="text-xs text-muted-foreground truncate">
                   {session?.user?.email}
                 </p>
               </div>
@@ -141,7 +144,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             onClick={() => setSidebarOpen(true)}
             className="text-gray-500 lg:hidden hover:text-gray-700"
           >
-            <Bars3Icon className="w-6 h-6" />
+            <Menu className="w-6 h-6" />
           </button>
 
           <div className="flex-1 lg:flex lg:justify-end">

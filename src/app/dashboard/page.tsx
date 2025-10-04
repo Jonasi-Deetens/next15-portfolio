@@ -9,14 +9,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/Card";
-import {
-  UserGroupIcon,
-  CubeIcon,
-  ChartBarIcon,
-  ClockIcon,
-} from "@heroicons/react/24/outline";
-import Link from "next/link";
+import { StatCard } from "@/components/ui/StatCard";
 import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
+import {
+  Users,
+  Cube,
+  TrendingUp,
+  Clock,
+  FileText,
+  ArrowRight,
+} from "lucide-react";
+import Link from "next/link";
 
 export default function DashboardPage() {
   const { data: session } = useSession();
@@ -25,31 +29,31 @@ export default function DashboardPage() {
 
   const stats = [
     {
-      name: "Total Users",
+      title: "Total Users",
       value: users?.length || 0,
-      icon: UserGroupIcon,
-      color: "bg-blue-500",
+      icon: <Users className="w-6 h-6" />,
+      variant: "primary" as const,
       href: "/dashboard/users",
     },
     {
-      name: "Installed Apps",
+      title: "Installed Apps",
       value: "0",
-      icon: CubeIcon,
-      color: "bg-purple-500",
+      icon: <Cube className="w-6 h-6" />,
+      variant: "secondary" as const,
       href: "/dashboard/apps",
     },
     {
-      name: "Total Posts",
+      title: "Total Posts",
       value: posts?.length || 0,
-      icon: ChartBarIcon,
-      color: "bg-green-500",
+      icon: <FileText className="w-6 h-6" />,
+      variant: "success" as const,
       href: "#",
     },
     {
-      name: "Recent Activity",
+      title: "Recent Activity",
       value: "0",
-      icon: ClockIcon,
-      color: "bg-orange-500",
+      icon: <Clock className="w-6 h-6" />,
+      variant: "warning" as const,
       href: "/dashboard/analytics",
     },
   ];
@@ -69,24 +73,8 @@ export default function DashboardPage() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
-          <Link key={stat.name} href={stat.href}>
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">
-                      {stat.name}
-                    </p>
-                    <p className="mt-2 text-3xl font-bold text-gray-900">
-                      {stat.value}
-                    </p>
-                  </div>
-                  <div className={`p-3 rounded-lg ${stat.color}`}>
-                    <stat.icon className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          <Link key={stat.title} href={stat.href}>
+            <StatCard {...stat} className="cursor-pointer" />
           </Link>
         ))}
       </div>
@@ -103,20 +91,23 @@ export default function DashboardPage() {
           <CardContent className="space-y-3">
             <Link href="/dashboard/apps">
               <Button variant="outline" className="w-full justify-start">
-                <CubeIcon className="w-5 h-5 mr-2" />
+                <Cube className="w-5 h-5 mr-2" />
                 Browse App Marketplace
+                <ArrowRight className="w-4 h-4 ml-auto" />
               </Button>
             </Link>
             <Link href="/dashboard/users">
               <Button variant="outline" className="w-full justify-start">
-                <UserGroupIcon className="w-5 h-5 mr-2" />
+                <Users className="w-5 h-5 mr-2" />
                 Manage Users
+                <ArrowRight className="w-4 h-4 ml-auto" />
               </Button>
             </Link>
-            <Link href="/dashboard/settings">
+            <Link href="/dashboard/analytics">
               <Button variant="outline" className="w-full justify-start">
-                <ChartBarIcon className="w-5 h-5 mr-2" />
+                <TrendingUp className="w-5 h-5 mr-2" />
                 View Analytics
+                <ArrowRight className="w-4 h-4 ml-auto" />
               </Button>
             </Link>
           </CardContent>
@@ -132,24 +123,30 @@ export default function DashboardPage() {
           <CardContent>
             <div className="space-y-3">
               <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 w-2 h-2 mt-2 bg-blue-500 rounded-full" />
+                <div className="flex-shrink-0">
+                  <Badge variant="info">New</Badge>
+                </div>
                 <div className="flex-1">
                   <p className="text-sm font-medium text-gray-900">
                     Account created
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted-foreground">
                     Welcome to NextApp!
                   </p>
                 </div>
               </div>
               {posts?.slice(0, 3).map((post) => (
                 <div key={post.id} className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-2 h-2 mt-2 bg-green-500 rounded-full" />
+                  <div className="flex-shrink-0">
+                    <Badge variant="success">
+                      <FileText className="w-3 h-3" />
+                    </Badge>
+                  </div>
                   <div className="flex-1">
                     <p className="text-sm font-medium text-gray-900">
                       Post created: {post.title}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-muted-foreground">
                       {new Date(post.createdAt).toLocaleDateString()}
                     </p>
                   </div>
