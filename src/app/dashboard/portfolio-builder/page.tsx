@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { ProjectForm } from "@/components/forms/ProjectForm";
 import { ProjectSkeleton } from "@/components/ui/ProjectSkeleton";
+import { ConfirmationModal } from "@/components/ui/ConfirmationModal";
 import { Plus, Edit, Trash2, ExternalLink, FileText } from "lucide-react";
 
 interface Project {
@@ -26,6 +27,15 @@ export default function PortfolioBuilderPage() {
   const [isAddingProject, setIsAddingProject] = useState(false);
   const [isEditingProject, setIsEditingProject] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    projectId: string | null;
+    projectTitle: string;
+  }>({
+    isOpen: false,
+    projectId: null,
+    projectTitle: "",
+  });
 
   // tRPC queries and mutations
   const { data: projects = [], isLoading } =
@@ -89,14 +99,23 @@ export default function PortfolioBuilderPage() {
     setEditingProject(null);
   };
 
-  const deleteProject = (id: string) => {
-    if (
-      window.confirm(
-        "Are you sure you want to delete this project? This action cannot be undone."
-      )
-    ) {
-      deleteProjectMutation.mutate({ id });
+  const handleDeleteClick = (project: Project) => {
+    setDeleteModal({
+      isOpen: true,
+      projectId: project.id,
+      projectTitle: project.title,
+    });
+  };
+
+  const handleDeleteConfirm = () => {
+    if (deleteModal.projectId) {
+      deleteProjectMutation.mutate({ id: deleteModal.projectId });
+      setDeleteModal({ isOpen: false, projectId: null, projectTitle: "" });
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModal({ isOpen: false, projectId: null, projectTitle: "" });
   };
 
   return (
@@ -186,7 +205,7 @@ export default function PortfolioBuilderPage() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => deleteProject(project.id)}
+                        onClick={() => handleDeleteClick(project)}
                         disabled={deleteProjectMutation.isPending}
                         className="h-8 w-8 p-0 text-red-500 hover:text-red-700 disabled:opacity-50"
                       >
@@ -250,6 +269,19 @@ export default function PortfolioBuilderPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Project"
+        message={`Are you sure you want to delete "${deleteModal.projectTitle}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+        isLoading={deleteProjectMutation.isPending}
+      />
     </div>
   );
 }

@@ -1,20 +1,26 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
+import { Select } from "@/components/ui/Select";
 import { ElementsPanel } from "@/components/resume/ElementsPanel";
 import { ResumeCanvas } from "@/components/resume/ResumeCanvas";
 import { ElementEditor } from "@/components/resume/ElementEditor";
 import { useResumeBuilder } from "@/hooks/useResumeBuilder";
 import { draggableElements } from "@/constants/resume";
-import { Eye, Save, FileText, Plus } from "lucide-react";
+import { Eye, Save, FileText } from "lucide-react";
 import { useState } from "react";
-import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { trpc } from "@/lib/trpc-client";
 
 export default function ResumeBuilderPage() {
   const [saveMessage, setSaveMessage] = useState<string>("");
-  const searchParams = useSearchParams();
-  const resumeId = searchParams.get("id");
+  const [currentResumeId, setCurrentResumeId] = useState<string | null>(null);
+
+  const { data: myResumes } = trpc.resume.getMyResumes.useQuery();
+  const { data: currentResume } = trpc.resume.getById.useQuery(
+    { id: currentResumeId! },
+    { enabled: !!currentResumeId }
+  );
 
   const {
     elements,
@@ -36,8 +42,7 @@ export default function ResumeBuilderPage() {
     draggingFromSidebar,
     saveResume,
     isLoading,
-    myResumes,
-  } = useResumeBuilder(resumeId || undefined);
+  } = useResumeBuilder(currentResume);
 
   const handleSave = async () => {
     try {
@@ -61,35 +66,24 @@ export default function ResumeBuilderPage() {
           </p>
           {myResumes && myResumes.length > 0 && (
             <div className="mt-3">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Load Resume:
-              </label>
-              <div className="flex gap-2">
-                <select
-                  value={resumeId || ""}
-                  onChange={(e) => {
-                    if (e.target.value) {
-                      window.location.href = `/dashboard/resume-builder?id=${e.target.value}`;
-                    } else {
-                      window.location.href = "/dashboard/resume-builder";
-                    }
-                  }}
-                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                >
-                  <option value="">New Resume</option>
-                  {myResumes.map((resume) => (
-                    <option key={resume.id} value={resume.id}>
-                      {resume.title}
-                    </option>
-                  ))}
-                </select>
-                <Link href="/dashboard/resumes">
-                  <Button variant="outline" size="sm">
-                    <FileText className="w-4 h-4 mr-1" />
-                    Manage
-                  </Button>
-                </Link>
-              </div>
+              <Select
+                label="Load Resume:"
+                value={currentResumeId || ""}
+                onChange={(e) => {
+                  if (e.target.value) {
+                    setCurrentResumeId(e.target.value);
+                  } else {
+                    setCurrentResumeId(null);
+                  }
+                }}
+                options={[
+                  { value: "", label: "New Resume" },
+                  ...myResumes.map((resume) => ({
+                    value: resume.id,
+                    label: resume.title,
+                  })),
+                ]}
+              />
             </div>
           )}
         </div>
@@ -101,6 +95,12 @@ export default function ResumeBuilderPage() {
             <Eye className="w-4 h-4 mr-2" />
             {isPreview ? "Edit" : "Preview"}
           </Button>
+          <Link href="/dashboard/resumes">
+            <Button variant="outline">
+              <FileText className="w-4 h-4 mr-2" />
+              Resumes
+            </Button>
+          </Link>
           <Button onClick={handleSave} disabled={isLoading}>
             <Save className="w-4 h-4 mr-2" />
             {isLoading ? "Saving..." : "Save Resume"}

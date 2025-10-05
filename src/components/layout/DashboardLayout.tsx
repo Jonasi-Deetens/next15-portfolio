@@ -41,10 +41,10 @@ const navigation = [
     settingKey: "portfolioBuilder",
   },
   {
-    name: "Resume",
-    href: "/dashboard/resume-builder",
+    name: "My Resumes",
+    href: "/dashboard/resumes",
     icon: FileText,
-    description: "Create resume",
+    description: "Manage resumes",
     settingKey: "resumeBuilder",
   },
   {
