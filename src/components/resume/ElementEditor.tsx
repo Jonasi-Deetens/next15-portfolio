@@ -4,45 +4,15 @@ import { FormikInput } from "@/components/ui/FormikInput";
 import { FormikTextarea } from "@/components/ui/FormikTextarea";
 import { ResumeElement } from "@/types/resume";
 import { Save, Trash2 } from "lucide-react";
-import { Formik, Form, useField } from "formik";
+import { Formik, Form } from "formik";
 import * as Yup from "yup";
+import { FormikSelect } from "../ui";
 
 interface ElementEditorProps {
   element: ResumeElement | null;
   onClose: () => void;
   onUpdate: (id: string, updates: Partial<ResumeElement>) => void;
   onDelete: (id: string) => void;
-}
-
-interface FormikSelectProps {
-  name: string;
-  label: string;
-  children: React.ReactNode;
-}
-
-function FormikSelect({ name, label, children }: FormikSelectProps) {
-  const [field, meta] = useField(name);
-
-  return (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">
-        {label}
-      </label>
-      <select
-        {...field}
-        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
-          meta.touched && meta.error
-            ? "border-red-300 focus:ring-red-500"
-            : "border-gray-300"
-        }`}
-      >
-        {children}
-      </select>
-      {meta.touched && meta.error && (
-        <div className="text-red-600 text-sm mt-1">{meta.error}</div>
-      )}
-    </div>
-  );
 }
 
 const getValidationSchema = (type: string) => {
@@ -98,6 +68,33 @@ const getValidationSchema = (type: string) => {
         width: Yup.number().min(50).max(500).required(),
         height: Yup.number().min(50).max(500).required(),
       });
+    case "shape":
+      return Yup.object({
+        type: Yup.string()
+          .oneOf(["triangle", "circle", "square", "diamond", "star"])
+          .required(),
+        color: Yup.string().required(),
+        size: Yup.number().min(10).max(200).required(),
+        rotation: Yup.number().min(0).max(360).required(),
+      });
+    case "line":
+      return Yup.object({
+        style: Yup.string().oneOf(["solid", "dashed", "dotted"]).required(),
+        color: Yup.string().required(),
+        thickness: Yup.number().min(1).max(20).required(),
+        length: Yup.number().min(20).max(500).required(),
+        angle: Yup.number().min(0).max(360).required(),
+      });
+    case "curve":
+      return Yup.object({
+        style: Yup.string()
+          .oneOf(["wave", "sine", "zigzag", "spiral"])
+          .required(),
+        color: Yup.string().required(),
+        thickness: Yup.number().min(1).max(10).required(),
+        amplitude: Yup.number().min(5).max(100).required(),
+        frequency: Yup.number().min(1).max(10).required(),
+      });
     default:
       return Yup.object({});
   }
@@ -142,10 +139,14 @@ export function ElementEditor({
                     label="Font Size"
                     type="number"
                   />
-                  <FormikSelect name="fontWeight" label="Font Weight">
-                    <option value="normal">Normal</option>
-                    <option value="bold">Bold</option>
-                  </FormikSelect>
+                  <FormikSelect
+                    name="fontWeight"
+                    label="Font Weight"
+                    options={[
+                      { value: "normal", label: "Normal" },
+                      { value: "bold", label: "Bold" },
+                    ]}
+                  ></FormikSelect>
                 </div>
               </>
             )}
@@ -220,6 +221,82 @@ export function ElementEditor({
                   placeholder="React, TypeScript, Node.js"
                 />
               </div>
+            )}
+
+            {type === "shape" && (
+              <>
+                <FormikSelect
+                  name="type"
+                  label="Shape Type"
+                  options={[
+                    { value: "triangle", label: "Triangle" },
+                    { value: "circle", label: "Circle" },
+                    { value: "square", label: "Square" },
+                    { value: "diamond", label: "Diamond" },
+                    { value: "star", label: "Star" },
+                  ]}
+                />
+                <FormikInput name="color" label="Color" placeholder="#10b981" />
+                <FormikInput name="size" label="Size (px)" type="number" />
+                <FormikInput
+                  name="rotation"
+                  label="Rotation (degrees)"
+                  type="number"
+                />
+              </>
+            )}
+
+            {type === "line" && (
+              <>
+                <FormikSelect
+                  name="style"
+                  label="Line Style"
+                  options={[
+                    { value: "solid", label: "Solid" },
+                    { value: "dashed", label: "Dashed" },
+                    { value: "dotted", label: "Dotted" },
+                  ]}
+                />
+                <FormikInput name="color" label="Color" placeholder="#10b981" />
+                <FormikInput
+                  name="thickness"
+                  label="Thickness (px)"
+                  type="number"
+                />
+                <FormikInput name="length" label="Length (px)" type="number" />
+                <FormikInput
+                  name="angle"
+                  label="Angle (degrees)"
+                  type="number"
+                />
+              </>
+            )}
+
+            {type === "curve" && (
+              <>
+                <FormikSelect
+                  name="style"
+                  label="Curve Style"
+                  options={[
+                    { value: "wave", label: "Wave" },
+                    { value: "sine", label: "Sine" },
+                    { value: "zigzag", label: "Zigzag" },
+                    { value: "spiral", label: "Spiral" },
+                  ]}
+                />
+                <FormikInput name="color" label="Color" placeholder="#10b981" />
+                <FormikInput
+                  name="thickness"
+                  label="Thickness (px)"
+                  type="number"
+                />
+                <FormikInput
+                  name="amplitude"
+                  label="Amplitude (px)"
+                  type="number"
+                />
+                <FormikInput name="frequency" label="Frequency" type="number" />
+              </>
             )}
           </Form>
         </Formik>

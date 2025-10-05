@@ -5,6 +5,9 @@ import { ExperienceElement } from "./elements/ExperienceElement";
 import { EducationElement } from "./elements/EducationElement";
 import { SkillElement } from "./elements/SkillElement";
 import { ContactElement } from "./elements/ContactElement";
+import { ShapeElement } from "./elements/ShapeElement";
+import { LineElement } from "./elements/LineElement";
+import { CurveElement } from "./elements/CurveElement";
 
 interface ResumeElementRendererProps {
   element: ResumeElement;
@@ -30,6 +33,12 @@ export function ResumeElementRenderer({
       return <SkillElement content={content} isPreview={isPreview} />;
     case "contact":
       return <ContactElement content={content} isPreview={isPreview} />;
+    case "shape":
+      return <ShapeElement content={content} isPreview={isPreview} />;
+    case "line":
+      return <LineElement content={content} isPreview={isPreview} />;
+    case "curve":
+      return <CurveElement content={content} isPreview={isPreview} />;
     default:
       return <div>Unknown element</div>;
   }

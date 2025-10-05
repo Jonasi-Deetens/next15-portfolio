@@ -14,7 +14,6 @@ interface ResumeCanvasProps {
   onElementMouseDown: (e: React.MouseEvent, element: ResumeElement) => void;
   onElementMouseMove: (e: MouseEvent) => void;
   onElementMouseUp: (e?: MouseEvent) => void;
-  onSidebarDragOver: (e: React.DragEvent) => void;
   onSidebarDragLeave: () => void;
   draggingFromSidebar?: {
     elementType: string;
@@ -32,13 +31,12 @@ export function ResumeCanvas({
   onElementMouseDown,
   onElementMouseMove,
   onElementMouseUp,
-  onSidebarDragOver,
   onSidebarDragLeave,
   draggingFromSidebar,
 }: ResumeCanvasProps) {
   useEffect(() => {
     const handleGlobalMouseMove = (e: MouseEvent) => {
-      onElementMouseMove(e as any);
+      onElementMouseMove(e);
     };
 
     const handleGlobalMouseUp = (e: MouseEvent) => {
@@ -73,7 +71,7 @@ export function ResumeCanvas({
           onDrop={isPreview ? undefined : onDrop}
           className={`relative transition-colors select-none ${
             isPreview
-              ? ""
+              ? "bg-gradient-to-br from-gray-50 to-white shadow-2xl"
               : draggingFromSidebar
               ? "border-2 border-dashed border-blue-400 bg-blue-50"
               : "border-2 border-dashed border-gray-300"
@@ -82,9 +80,11 @@ export function ResumeCanvas({
             width: "210mm",
             height: "297mm",
             minHeight: "297mm",
-            background: "white",
+            background: isPreview
+              ? "linear-gradient(135deg, #f8fafc 0%, #ffffff 100%)"
+              : "white",
             boxShadow: isPreview
-              ? "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)"
+              ? "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05)"
               : draggingFromSidebar
               ? "0 0 20px rgba(59, 130, 246, 0.3)"
               : "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",

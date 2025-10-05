@@ -5,6 +5,11 @@ import {
   GraduationCap,
   Award,
   Phone,
+  Minus,
+  Hash,
+  Star,
+  Quote,
+  MoreHorizontal,
 } from "lucide-react";
 import { DraggableElement } from "@/types/resume";
 
@@ -45,6 +50,24 @@ export const draggableElements: DraggableElement[] = [
     icon: <Phone className="w-4 h-4" />,
     description: "Add contact information",
   },
+  {
+    type: "shape",
+    label: "Shape",
+    icon: <Star className="w-4 h-4" />,
+    description: "Add decorative shapes",
+  },
+  {
+    type: "line",
+    label: "Line",
+    icon: <Minus className="w-4 h-4" />,
+    description: "Add decorative lines",
+  },
+  {
+    type: "curve",
+    label: "Curve",
+    icon: <Quote className="w-4 h-4" />,
+    description: "Add curved elements",
+  },
 ];
 
 export const getDefaultContent = (type: string) => {
@@ -80,6 +103,29 @@ export const getDefaultContent = (type: string) => {
         email: "",
         location: "",
         website: "",
+      };
+    case "shape":
+      return {
+        type: "triangle",
+        color: "#10b981",
+        size: 50,
+        rotation: 0,
+      };
+    case "line":
+      return {
+        style: "solid",
+        color: "#10b981",
+        thickness: 2,
+        length: 100,
+        angle: 0,
+      };
+    case "curve":
+      return {
+        style: "wave",
+        color: "#10b981",
+        thickness: 2,
+        amplitude: 20,
+        frequency: 2,
       };
     default:
       return {};
