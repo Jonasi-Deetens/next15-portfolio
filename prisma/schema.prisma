@@ -26,21 +26,22 @@ enum UserStatus {
 }
 
 model User {
-  id            String       @id @default(cuid())
-  email         String       @unique
+  id            String        @id @default(cuid())
+  email         String        @unique
   name          String?
-  password      String?      // For credentials authentication
+  password      String? // For credentials authentication
   emailVerified DateTime?
   image         String?
-  role          UserRole     @default(USER)
-  status        UserStatus   @default(ACTIVE)
+  role          UserRole      @default(USER)
+  status        UserStatus    @default(ACTIVE)
   lastLoginAt   DateTime?
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  settings      Json          @default("{}") // User preferences and enabled features
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
   posts         Post[]
+  projects      Project[]
   accounts      Account[]
   sessions      Session[]
-  installedApps InstalledApp[]
   activityLogs  ActivityLog[]
 }
 
@@ -90,52 +91,36 @@ model Post {
   author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
 }
 
-// App Registry System
-model AppDefinition {
-  id            String         @id @default(cuid())
-  name          String         @unique // Internal name (e.g., "crm")
-  displayName   String         // Display name (e.g., "Customer Relationship Management")
-  description   String
-  version       String
-  category      String
-  icon          String?
-  route         String         // Base route for the app (e.g., "/apps/crm")
-  isActive      Boolean        @default(true)
-  isPublic      Boolean        @default(true) // If false, only admins can see/install
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  installedApps InstalledApp[]
-}
-
-model InstalledApp {
-  id          String        @id @default(cuid())
-  userId      String
-  appId       String
-  settings    Json?         // App-specific configuration
-  isEnabled   Boolean       @default(true)
-  installedAt DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  app         AppDefinition @relation(fields: [appId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, appId])
-  @@index([userId])
-}
-
 // Activity Logging
 model ActivityLog {
-  id          String   @id @default(cuid())
-  userId      String
-  action      String   // e.g., "user.login", "app.install", "user.update"
-  entityType  String?  // e.g., "User", "App", "Post"
-  entityId    String?
-  metadata    Json?    // Additional context
-  ipAddress   String?
-  userAgent   String?
-  createdAt   DateTime @default(now())
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id         String   @id @default(cuid())
+  userId     String
+  action     String // e.g., "user.login", "app.install", "user.update"
+  entityType String? // e.g., "User", "App", "Post"
+  entityId   String?
+  metadata   Json? // Additional context
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([action])
+  @@index([createdAt])
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  link        String?
+  image       String?
+  tags        String[] @default([])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
   @@index([createdAt])
 }
