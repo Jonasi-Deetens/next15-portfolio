@@ -28,7 +28,6 @@ export const userRouter = router({
         posts: true,
         _count: {
           select: {
-            installedApps: true,
             activityLogs: true,
           },
         },
@@ -92,11 +91,6 @@ export const userRouter = router({
       where: { id: ctx.session.user.id },
       include: {
         posts: true,
-        installedApps: {
-          include: {
-            app: true,
-          },
-        },
       },
     });
   }),
@@ -106,11 +100,6 @@ export const userRouter = router({
     return await db.user.findMany({
       include: {
         posts: true,
-        installedApps: {
-          include: {
-            app: true,
-          },
-        },
         _count: {
           select: {
             activityLogs: true,
@@ -308,4 +297,43 @@ export const userRouter = router({
       suspended,
     };
   }),
+
+  // Settings routes
+  getSettings: protectedProcedure.query(async ({ ctx }) => {
+    const user = await db.user.findUnique({
+      where: { id: ctx.session.user.id },
+      select: { settings: true },
+    });
+
+    return user?.settings || {};
+  }),
+
+  updateSettings: protectedProcedure
+    .input(
+      z.object({
+        settings: z.record(z.string(), z.any()),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const user = await db.user.update({
+        where: { id: ctx.session.user.id },
+        data: { settings: input.settings as any },
+        select: { settings: true },
+      });
+
+      // Log activity
+      await db.activityLog.create({
+        data: {
+          userId: ctx.session.user.id,
+          action: "user.settings.updated",
+          entityType: "User",
+          entityId: ctx.session.user.id,
+          metadata: {
+            settings: input.settings,
+          } as any,
+        },
+      });
+
+      return user.settings;
+    }),
 });
