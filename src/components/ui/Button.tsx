@@ -2,24 +2,46 @@ import { ButtonHTMLAttributes, forwardRef } from "react";
 import { cn } from "@/lib/utils";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+  variant?:
+    | "default"
+    | "destructive"
+    | "outline"
+    | "secondary"
+    | "ghost"
+    | "link";
   size?: "default" | "sm" | "lg" | "icon";
   loading?: boolean;
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = "default", size = "default", loading, children, disabled, ...props }, ref) => {
+  (
+    {
+      className,
+      variant = "default",
+      size = "default",
+      loading,
+      children,
+      disabled,
+      ...props
+    },
+    ref
+  ) => {
     return (
       <button
         className={cn(
-          "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+          "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
           {
-            "bg-primary text-primary-foreground hover:bg-primary/90": variant === "default",
-            "bg-destructive text-destructive-foreground hover:bg-destructive/90": variant === "destructive",
-            "border border-input bg-background hover:bg-accent hover:text-accent-foreground": variant === "outline",
-            "bg-secondary text-secondary-foreground hover:bg-secondary/80": variant === "secondary",
-            "hover:bg-accent hover:text-accent-foreground": variant === "ghost",
-            "text-primary underline-offset-4 hover:underline": variant === "link",
+            "bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm":
+              variant === "default",
+            "bg-red-600 text-white hover:bg-red-700 shadow-sm":
+              variant === "destructive",
+            "border border-gray-300 bg-white hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300":
+              variant === "outline",
+            "bg-gray-100 text-gray-900 hover:bg-gray-200":
+              variant === "secondary",
+            "hover:bg-emerald-50 hover:text-emerald-700": variant === "ghost",
+            "text-emerald-600 underline-offset-4 hover:underline":
+              variant === "link",
           },
           {
             "h-10 px-4 py-2": size === "default",

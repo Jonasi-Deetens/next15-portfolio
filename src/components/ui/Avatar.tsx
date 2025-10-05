@@ -34,7 +34,7 @@ const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
             className="aspect-square h-full w-full object-cover"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 font-semibold text-white">
+          <div className="flex h-full w-full items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-green-600 font-semibold text-white">
             {fallback.charAt(0).toUpperCase()}
           </div>
         )}

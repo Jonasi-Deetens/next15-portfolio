@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { Cube, Download, Check } from "lucide-react";
+import { Box, Download, Check } from "lucide-react";
 
 const availableApps = [
   {
@@ -72,7 +72,7 @@ export default function AppsPage() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-              <Cube className="w-8 h-8 text-gray-400" />
+              <Box className="w-8 h-8 text-gray-400" />
             </div>
             <p className="text-gray-900 font-medium text-center">
               No apps installed yet

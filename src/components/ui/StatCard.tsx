@@ -10,33 +10,48 @@ export interface StatCardProps extends HTMLAttributes<HTMLDivElement> {
     value: string;
     positive: boolean;
   };
-  variant?: "default" | "primary" | "success" | "warning" | "danger";
+  variant?:
+    | "default"
+    | "primary"
+    | "success"
+    | "warning"
+    | "danger"
+    | "secondary";
 }
 
 const StatCard = forwardRef<HTMLDivElement, StatCardProps>(
-  ({ className, title, value, icon, trend, variant = "default", ...props }, ref) => {
+  (
+    { className, title, value, icon, trend, variant = "default", ...props },
+    ref
+  ) => {
     const iconVariants = {
-      default: "bg-gray-500",
-      primary: "bg-blue-500",
+      default: "bg-emerald-500",
+      primary: "bg-emerald-500",
       success: "bg-green-500",
       warning: "bg-orange-500",
       danger: "bg-red-500",
+      secondary: "bg-teal-500",
     };
 
     const valueVariants = {
-      default: "text-gray-900",
-      primary: "text-blue-600",
+      default: "text-emerald-600",
+      primary: "text-emerald-600",
       success: "text-green-600",
       warning: "text-orange-600",
       danger: "text-red-600",
+      secondary: "text-teal-600",
     };
 
     return (
-      <Card ref={ref} className={cn("hover:shadow-lg transition-shadow", className)} {...props}>
+      <Card
+        ref={ref}
+        className={cn("hover:shadow-lg transition-shadow", className)}
+        {...props}
+      >
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div className="space-y-2">
-              <p className="text-sm font-medium text-muted-foreground">{title}</p>
+              <p className="text-sm font-medium text-gray-600">{title}</p>
               <div className="flex items-baseline gap-2">
                 <p className={cn("text-3xl font-bold", valueVariants[variant])}>
                   {value}

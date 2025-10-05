@@ -12,7 +12,21 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/Card";
-import { Alert, AlertDescription } from "@/components/ui/Alert";
+import { Badge } from "@/components/ui/Badge";
+import {
+  ArrowRight,
+  Sparkles,
+  Zap,
+  Shield,
+  Users,
+  FileText,
+  TrendingUp,
+  Star,
+  CheckCircle,
+  Globe,
+  Lock,
+  Code,
+} from "lucide-react";
 import Link from "next/link";
 
 export default function Home() {
@@ -43,50 +57,195 @@ export default function Home() {
   });
 
   return (
-    <div className="bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Hero Section */}
-        <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-            Welcome to{" "}
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              NextApp
-            </span>
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-            A modern full-stack application built with Next.js 15, tRPC, Prisma,
-            and NextAuth. Experience the power of type-safe APIs and seamless
-            authentication.
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-slate-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          {/* Left side - App Grid */}
+          <div className="space-y-8">
+            <div className="text-center lg:text-left">
+              <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight">
+                Who{" "}
+                <span className="bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
+                  are
+                </span>
+                <br />
+                you?
+              </h1>
 
-          {!session && (
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg">
-                <Link href="/auth/signup">Get Started</Link>
-              </Button>
-              <Button variant="outline" size="lg">
-                <Link href="/auth/signin">Sign In</Link>
-              </Button>
+              <p className="text-xl text-gray-600 mb-8 max-w-lg">
+                Create your professional portfolio. Showcase your story. Get
+                discovered.
+              </p>
+
+              {!session && (
+                <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                  <Button size="lg" className="px-8 py-4 text-lg">
+                    <Link href="/auth/signup" className="flex items-center">
+                      Start Building
+                      <ArrowRight className="w-5 h-5 ml-2" />
+                    </Link>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="px-8 py-4 text-lg"
+                  >
+                    <Link href="/auth/signin">Browse Portfolios</Link>
+                  </Button>
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
-        {session && (
+            {/* Simple Features */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 text-gray-600">
+                <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                <span>Professional profiles</span>
+              </div>
+              <div className="flex items-center gap-3 text-gray-600">
+                <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                <span>Customizable design</span>
+              </div>
+              <div className="flex items-center gap-3 text-gray-600">
+                <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                <span>Global reach</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Right side - Content */}
+          <div className="space-y-8">
+            <div className="text-center lg:text-right">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                Simple. Beautiful. Effective.
+              </h2>
+              <p className="text-lg text-gray-600 mb-8">
+                Build your professional presence in minutes, not hours.
+              </p>
+            </div>
+
+            {!session && (
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-end">
+                <Button size="lg" className="px-8 py-4 text-lg">
+                  <Link href="/auth/signup" className="flex items-center">
+                    Get Started Free
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </Link>
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Dashboard Preview Section */}
+      {session && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Welcome back, {session.user?.name}! 👋
+            </h2>
+            <p className="text-xl text-gray-600 mb-8">
+              Your portfolio is ready. Let's showcase your story.
+            </p>
+            <Button size="lg" className="px-8 py-4 text-lg">
+              <Link href="/dashboard" className="flex items-center">
+                Manage Portfolio
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Link>
+            </Button>
+          </div>
+
+          {/* Quick Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-16">
+            <Card className="bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-emerald-600">
+                      Portfolio Views
+                    </p>
+                    <p className="text-3xl font-bold text-emerald-900">1,234</p>
+                  </div>
+                  <Users className="w-8 h-8 text-emerald-600" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-green-600">
+                      Projects
+                    </p>
+                    <p className="text-3xl font-bold text-green-900">
+                      {myPosts?.length || 0}
+                    </p>
+                  </div>
+                  <FileText className="w-8 h-8 text-green-600" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-teal-50 to-teal-100 border-teal-200">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-teal-600">
+                      Connections
+                    </p>
+                    <p className="text-3xl font-bold text-teal-900">42</p>
+                  </div>
+                  <TrendingUp className="w-8 h-8 text-teal-600" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-orange-600">
+                      Skills
+                    </p>
+                    <p className="text-3xl font-bold text-orange-900">12</p>
+                  </div>
+                  <Star className="w-8 h-8 text-orange-600" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Recent Activity */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Users Section */}
             <Card>
               <CardHeader>
-                <CardTitle>Users</CardTitle>
-                <CardDescription>View registered users</CardDescription>
+                <CardTitle className="flex items-center">
+                  <TrendingUp className="w-5 h-5 mr-2" />
+                  Recent Projects
+                </CardTitle>
+                <CardDescription>Your latest portfolio updates</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
-                  {users?.map((user) => (
-                    <div key={user.id} className="p-3 bg-gray-50 rounded-md">
-                      <div className="font-medium">{user.name}</div>
-                      <div className="text-sm text-gray-600">{user.email}</div>
-                      <div className="text-xs text-gray-500">
-                        {user.posts.length} posts
+                <div className="space-y-4">
+                  {posts?.slice(0, 3).map((post) => (
+                    <div
+                      key={post.id}
+                      className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg"
+                    >
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <FileText className="w-4 h-4 text-blue-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-900">
+                          {post.title}
+                        </h4>
+                        <p className="text-sm text-gray-600">{post.content}</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          By {post.author.name} •{" "}
+                          {new Date(post.createdAt).toLocaleDateString()}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -94,110 +253,41 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            {/* Posts Section */}
             <Card>
               <CardHeader>
-                <CardTitle>Posts</CardTitle>
-                <CardDescription>Create and manage posts</CardDescription>
+                <CardTitle className="flex items-center">
+                  <Users className="w-5 h-5 mr-2" />
+                  Network
+                </CardTitle>
+                <CardDescription>Your professional connections</CardDescription>
               </CardHeader>
               <CardContent>
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    if (session) {
-                      createPost.mutate({
-                        title,
-                        content,
-                      });
-                    }
-                  }}
-                  className="space-y-4"
-                >
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Title
-                    </label>
-                    <input
-                      type="text"
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Enter title"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Content
-                    </label>
-                    <textarea
-                      value={content}
-                      onChange={(e) => setContent(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Enter content"
-                      rows={3}
-                    />
-                  </div>
-                  <Button
-                    type="submit"
-                    disabled={createPost.isPending || !session}
-                    className="w-full"
-                    loading={createPost.isPending}
-                  >
-                    {createPost.isPending ? "Creating..." : "Create Post"}
-                  </Button>
-                </form>
-
-                <div className="mt-6 space-y-4">
-                  <div>
-                    <h3 className="font-semibold text-gray-800 mb-3">
-                      All Posts
-                    </h3>
-                    <div className="space-y-2">
-                      {posts?.map((post) => (
-                        <div
-                          key={post.id}
-                          className="p-3 bg-gray-50 rounded-md"
-                        >
-                          <div className="font-medium">{post.title}</div>
-                          <div className="text-sm text-gray-600">
-                            {post.content}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            By {post.author.name} •{" "}
-                            {post.published ? "Published" : "Draft"}
-                          </div>
-                        </div>
-                      ))}
+                <div className="space-y-4">
+                  {users?.slice(0, 4).map((user) => (
+                    <div
+                      key={user.id}
+                      className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
+                    >
+                      <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-medium text-sm">
+                        {user.name?.charAt(0) || "U"}
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-900">
+                          {user.name}
+                        </h4>
+                        <p className="text-sm text-gray-600">{user.email}</p>
+                      </div>
+                      <Badge variant="secondary">
+                        {user.posts.length} posts
+                      </Badge>
                     </div>
-                  </div>
-
-                  <div>
-                    <h3 className="font-semibold text-gray-800 mb-3">
-                      My Posts
-                    </h3>
-                    <div className="space-y-2">
-                      {myPosts?.map((post) => (
-                        <div
-                          key={post.id}
-                          className="p-3 bg-blue-50 rounded-md"
-                        >
-                          <div className="font-medium">{post.title}</div>
-                          <div className="text-sm text-gray-600">
-                            {post.content}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {post.published ? "Published" : "Draft"}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import {
   Users,
-  Cube,
+  Box,
   TrendingUp,
   Clock,
   FileText,
@@ -38,7 +38,7 @@ export default function DashboardPage() {
     {
       title: "Installed Apps",
       value: "0",
-      icon: <Cube className="w-6 h-6" />,
+      icon: <Box className="w-6 h-6" />,
       variant: "secondary" as const,
       href: "/dashboard/apps",
     },
@@ -66,7 +66,7 @@ export default function DashboardPage() {
           Welcome back, {session?.user?.name || "User"}!
         </h1>
         <p className="mt-2 text-gray-600">
-          Here's what's happening with your account today.
+          Here&apos;s what&apos;s happening with your account today.
         </p>
       </div>
 
@@ -84,14 +84,12 @@ export default function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>
-              Common tasks you can perform
-            </CardDescription>
+            <CardDescription>Common tasks you can perform</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <Link href="/dashboard/apps">
               <Button variant="outline" className="w-full justify-start">
-                <Cube className="w-5 h-5 mr-2" />
+                <Box className="w-5 h-5 mr-2" />
                 Browse App Marketplace
                 <ArrowRight className="w-4 h-4 ml-auto" />
               </Button>
@@ -116,9 +114,7 @@ export default function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>
-              Your latest actions and updates
-            </CardDescription>
+            <CardDescription>Your latest actions and updates</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
