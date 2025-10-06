@@ -11,11 +11,7 @@ export function ContactElement({
   isPreview = false,
 }: ContactElementProps) {
   return (
-    <div
-      className={`p-3 ${
-        isPreview ? "" : "border border-dashed border-gray-300 rounded"
-      }`}
-    >
+    <div className="p-3">
       <h4 className="font-semibold mb-2">Contact</h4>
       <div className="space-y-1 text-sm">
         {content.phone && (

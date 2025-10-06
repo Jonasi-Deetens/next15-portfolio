@@ -1,8 +1,16 @@
 import { useEffect } from "react";
 import { Button } from "@/components/ui/Button";
 import { ResumeElementRenderer } from "./ResumeElementRenderer";
+import { TransformControls } from "./TransformControls";
 import { ResumeElement } from "@/types/resume";
-import { Type, Edit, Trash2 } from "lucide-react";
+import {
+  Type,
+  Edit,
+  Trash2,
+  ChevronUp,
+  ChevronDown,
+  RotateCcw,
+} from "lucide-react";
 
 interface ResumeCanvasProps {
   elements: ResumeElement[];
@@ -15,6 +23,10 @@ interface ResumeCanvasProps {
   onElementMouseMove: (e: MouseEvent) => void;
   onElementMouseUp: (e?: MouseEvent) => void;
   onSidebarDragLeave: () => void;
+  onElementUpdate: (id: string, updates: Partial<ResumeElement>) => void;
+  onBringToFront: (id: string) => void;
+  onSendToBack: (id: string) => void;
+  onRotateElement: (id: string, e: React.MouseEvent) => void;
   draggingFromSidebar?: {
     elementType: string;
     startPosition: { x: number; y: number };
@@ -32,6 +44,10 @@ export function ResumeCanvas({
   onElementMouseMove,
   onElementMouseUp,
   onSidebarDragLeave,
+  onElementUpdate,
+  onBringToFront,
+  onSendToBack,
+  onRotateElement,
   draggingFromSidebar,
 }: ResumeCanvasProps) {
   useEffect(() => {
@@ -137,7 +153,7 @@ export function ResumeCanvas({
                 key={element.id}
                 className={`absolute ${
                   element.isDragging
-                    ? "cursor-grabbing z-50 opacity-80 scale-105"
+                    ? "cursor-grabbing z-50 opacity-80"
                     : element.isPreview
                     ? "cursor-pointer z-40 opacity-60"
                     : isPreview
@@ -149,18 +165,69 @@ export function ResumeCanvas({
                   top: element.position.y,
                   width: element.size.width,
                   height: element.size.height,
+                  transform: element.rotation
+                    ? `rotate(${element.rotation}deg)`
+                    : undefined,
+                  transformOrigin: "center",
                 }}
                 onMouseDown={
-                  isPreview ? undefined : (e) => onElementMouseDown(e, element)
+                  isPreview ? undefined : undefined // Let TransformControls handle all mouse events
                 }
               >
                 <ResumeElementRenderer
                   element={element}
                   isPreview={isPreview}
                 />
+
+                {/* Transform Controls */}
+                {!isPreview && !element.isPreview && (
+                  <TransformControls
+                    element={element}
+                    onUpdate={(updates) => onElementUpdate(element.id, updates)}
+                    onSelect={() => {}}
+                    onElementMouseDown={onElementMouseDown}
+                  />
+                )}
+
                 {!isPreview && !element.isPreview && (
                   <div className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <div className="flex gap-1">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onBringToFront(element.id);
+                        }}
+                        className="h-6 w-6 p-0"
+                        title="Bring to front"
+                      >
+                        <ChevronUp className="w-3 h-3" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSendToBack(element.id);
+                        }}
+                        className="h-6 w-6 p-0"
+                        title="Send to back"
+                      >
+                        <ChevronDown className="w-3 h-3" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
+                          onRotateElement(element.id, e);
+                        }}
+                        className="h-6 w-6 p-0 cursor-grab active:cursor-grabbing"
+                        title="Rotate (hold and drag)"
+                      >
+                        <RotateCcw className="w-3 h-3" />
+                      </Button>
                       <Button
                         size="sm"
                         variant="outline"

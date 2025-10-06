@@ -9,6 +9,12 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "www.bottega7.com",
+        port: "",
+        pathname: "/**",
+      },
     ],
   },
 };

@@ -62,7 +62,8 @@ export default function ResumesPage() {
         title: template.name,
         elements: template.elements,
       });
-      window.location.href = `/dashboard/resumes/resume-builder?id=${newResume.id}`;
+      // Navigate to builder with the new resume ID
+      window.location.href = `/dashboard/resumes/builder?resumeId=${newResume.id}`;
     } catch (error) {
       console.error("Failed to create resume from template:", error);
     }
@@ -110,7 +111,7 @@ export default function ResumesPage() {
             <Sparkles className="w-4 h-4 mr-2" />
             Templates
           </Button>
-          <Link href="/dashboard/resumes/resume-builder">
+          <Link href="/dashboard/resumes/builder">
             <Button>
               <Plus className="w-4 h-4 mr-2" />
               Create New Resume
@@ -154,64 +155,53 @@ export default function ResumesPage() {
 
       {resumes && resumes.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {resumes.map(
-            (resume: {
-              id: string;
-              title: string;
-              createdAt: string;
-              updatedAt: string;
-              elements: unknown[];
-            }) => (
-              <Card
-                key={resume.id}
-                className="hover:shadow-lg transition-shadow"
-              >
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <FileText className="w-5 h-5 text-emerald-600" />
-                      <CardTitle className="text-lg">{resume.title}</CardTitle>
-                    </div>
-                    <div className="flex space-x-1">
-                      <Link
-                        href={`/dashboard/resumes/resume-builder?id=${resume.id}`}
-                      >
-                        <Button size="sm" variant="outline">
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                      </Link>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleDeleteClick(resume)}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <Trash2 className="w-4 h-4" />
+          {resumes.map((resume) => (
+            <Card key={resume.id} className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <FileText className="w-5 h-5 text-emerald-600" />
+                    <CardTitle className="text-lg">{resume.title}</CardTitle>
+                  </div>
+                  <div className="flex space-x-1">
+                    <Link
+                      href={`/dashboard/resumes/builder?resumeId=${resume.id}`}
+                    >
+                      <Button size="sm" variant="outline">
+                        <Edit className="w-4 h-4" />
                       </Button>
-                    </div>
+                    </Link>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleDeleteClick(resume)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="flex items-center text-sm text-gray-600">
-                      <Calendar className="w-4 h-4 mr-2" />
-                      Created: {new Date(resume.createdAt).toLocaleDateString()}
-                    </div>
-                    <div className="flex items-center text-sm text-gray-600">
-                      <Calendar className="w-4 h-4 mr-2" />
-                      Updated: {new Date(resume.updatedAt).toLocaleDateString()}
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      Elements:{" "}
-                      {Array.isArray(resume.elements)
-                        ? resume.elements.length
-                        : 0}
-                    </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="flex items-center text-sm text-gray-600">
+                    <Calendar className="w-4 h-4 mr-2" />
+                    Created: {new Date(resume.createdAt).toLocaleDateString()}
                   </div>
-                </CardContent>
-              </Card>
-            )
-          )}
+                  <div className="flex items-center text-sm text-gray-600">
+                    <Calendar className="w-4 h-4 mr-2" />
+                    Updated: {new Date(resume.updatedAt).toLocaleDateString()}
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    Elements:{" "}
+                    {Array.isArray(resume.elements)
+                      ? resume.elements.length
+                      : 0}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       ) : (
         <Card>
@@ -223,7 +213,7 @@ export default function ResumesPage() {
             <p className="text-gray-600 mb-4">
               Create your first resume to get started
             </p>
-            <Link href="/dashboard/resumes/resume-builder">
+            <Link href="/dashboard/resumes/builder">
               <Button>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Resume

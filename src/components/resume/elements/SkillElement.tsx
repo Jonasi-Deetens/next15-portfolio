@@ -12,9 +12,7 @@ export function SkillElement({
 }: SkillElementProps) {
   return (
     <div
-      className={`p-3 ${
-        isPreview ? "" : "border border-dashed border-gray-300 rounded"
-      }`}
+      className="p-3"
     >
       <h4 className="font-semibold mb-2">Skills</h4>
       <div className="flex flex-wrap gap-1">

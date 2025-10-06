@@ -1,26 +1,31 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
-import { Select } from "@/components/ui/Select";
 import { ElementsPanel } from "@/components/resume/ElementsPanel";
 import { ResumeCanvas } from "@/components/resume/ResumeCanvas";
 import { ElementEditor } from "@/components/resume/ElementEditor";
 import { useResumeBuilder } from "@/hooks/useResumeBuilder";
 import { draggableElements } from "@/constants/resume";
 import { Eye, Save, FileText } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { trpc } from "@/lib/trpc-client";
 
 export default function ResumeBuilderPage() {
   const [saveMessage, setSaveMessage] = useState<string>("");
-  const [currentResumeId, setCurrentResumeId] = useState<string | null>(null);
+  const [selectedResumeId, setSelectedResumeId] = useState<string>("");
+  const searchParams = useSearchParams();
+  const urlResumeId = searchParams.get("resumeId");
 
-  const { data: myResumes } = trpc.resume.getMyResumes.useQuery();
-  const { data: currentResume } = trpc.resume.getById.useQuery(
-    { id: currentResumeId! },
-    { enabled: !!currentResumeId }
-  );
+  // Initialize with URL parameter if available
+  useEffect(() => {
+    if (urlResumeId) {
+      setSelectedResumeId(urlResumeId);
+    }
+  }, [urlResumeId]);
+
+  // Use selectedResumeId as the primary source
+  const resumeId = selectedResumeId;
 
   const {
     elements,
@@ -31,6 +36,9 @@ export default function ResumeBuilderPage() {
     updateElement,
     deleteElement,
     editElement,
+    bringToFront,
+    sendToBack,
+    rotateElement,
     closeEditor,
     togglePreview,
     handleElementMouseDown,
@@ -42,7 +50,8 @@ export default function ResumeBuilderPage() {
     draggingFromSidebar,
     saveResume,
     isLoading,
-  } = useResumeBuilder(currentResume);
+    myResumes,
+  } = useResumeBuilder(resumeId || undefined);
 
   const handleSave = async () => {
     try {
@@ -66,28 +75,35 @@ export default function ResumeBuilderPage() {
           </p>
           {myResumes && myResumes.length > 0 && (
             <div className="mt-3">
-              <Select
-                label="Load Resume:"
-                value={currentResumeId || ""}
-                onChange={(e) => {
-                  if (e.target.value) {
-                    setCurrentResumeId(e.target.value);
-                  } else {
-                    setCurrentResumeId(null);
-                  }
-                }}
-                options={[
-                  { value: "", label: "New Resume" },
-                  ...myResumes.map((resume) => ({
-                    value: resume.id,
-                    label: resume.title,
-                  })),
-                ]}
-              />
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Load Resume:
+              </label>
+              <div className="flex gap-2">
+                <select
+                  value={resumeId || ""}
+                  onChange={(e) => {
+                    setSelectedResumeId(e.target.value);
+                  }}
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                >
+                  <option value="">New Resume</option>
+                  {myResumes.map((resume) => (
+                    <option key={resume.id} value={resume.id}>
+                      {resume.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           )}
         </div>
         <div className="flex gap-3">
+          <Link href="/dashboard/resumes">
+            <Button variant="outline">
+              <FileText className="w-4 h-4 mr-2" />
+              Resumes
+            </Button>
+          </Link>
           <Button
             onClick={togglePreview}
             variant={isPreview ? "default" : "outline"}
@@ -95,12 +111,6 @@ export default function ResumeBuilderPage() {
             <Eye className="w-4 h-4 mr-2" />
             {isPreview ? "Edit" : "Preview"}
           </Button>
-          <Link href="/dashboard/resumes">
-            <Button variant="outline">
-              <FileText className="w-4 h-4 mr-2" />
-              Resumes
-            </Button>
-          </Link>
           <Button onClick={handleSave} disabled={isLoading}>
             <Save className="w-4 h-4 mr-2" />
             {isLoading ? "Saving..." : "Save Resume"}
@@ -140,11 +150,14 @@ export default function ResumeBuilderPage() {
             onDrop={handleDrop}
             onEditElement={editElement}
             onDeleteElement={deleteElement}
+            onBringToFront={bringToFront}
+            onSendToBack={sendToBack}
+            onRotateElement={(id, e) => rotateElement(id, e)}
             onElementMouseDown={handleElementMouseDown}
             onElementMouseMove={handleElementMouseMove}
             onElementMouseUp={handleElementMouseUp}
-            onSidebarDragOver={handleSidebarDragOver}
             onSidebarDragLeave={handleSidebarDragLeave}
+            onElementUpdate={updateElement}
             draggingFromSidebar={draggingFromSidebar}
           />
         </div>

@@ -20,16 +20,10 @@ export function LineElement({ content, isPreview = false }: LineElementProps) {
   };
 
   return (
-    <div
-      className={`${
-        isPreview
-          ? "w-full flex justify-center items-center"
-          : "border border-dashed border-gray-300 rounded p-2 flex justify-center items-center"
-      }`}
-    >
+    <div className="w-full h-full flex justify-center items-center">
       <div
+        className="w-full"
         style={{
-          width: `${length}px`,
           height: `${thickness}px`,
           backgroundColor: color,
           borderStyle: getLineStyle(),
@@ -37,7 +31,6 @@ export function LineElement({ content, isPreview = false }: LineElementProps) {
           borderColor: color,
           transform: `rotate(${angle}deg)`,
         }}
-        className="border-0"
       />
     </div>
   );

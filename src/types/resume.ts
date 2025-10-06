@@ -1,20 +1,34 @@
 export interface ResumeElement {
   id: string;
-  type:
-    | "text"
-    | "image"
-    | "experience"
-    | "education"
-    | "skill"
-    | "contact"
-    | "shape"
-    | "line"
-    | "curve";
-  content: any;
+  type: ResumeElementType;
+  content: ResumeElementContent;
   position: { x: number; y: number };
   size: { width: number; height: number };
+  rotation?: number;
   isDragging?: boolean;
   isPreview?: boolean;
+  isSelected?: boolean;
+}
+
+export type ResumeElementType =
+  | "text"
+  | "image"
+  | "experience"
+  | "education"
+  | "skill"
+  | "contact"
+  | "shape"
+  | "line";
+
+export interface ResumeElementContent {
+  text: string;
+  image: string;
+  experience: ExperienceData;
+  education: EducationData;
+  skill: SkillData;
+  contact: ContactData;
+  shape: ShapeData;
+  line: LineData;
 }
 
 export interface ExperienceData {
@@ -73,14 +87,6 @@ export interface LineData {
   thickness: number;
   length: number;
   angle: number;
-}
-
-export interface CurveData {
-  style: "wave" | "sine" | "zigzag" | "spiral";
-  color: string;
-  thickness: number;
-  amplitude: number;
-  frequency: number;
 }
 
 export interface DraggableElement {

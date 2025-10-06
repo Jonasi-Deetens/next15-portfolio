@@ -10,11 +10,7 @@ export function EducationElement({
   isPreview = false,
 }: EducationElementProps) {
   return (
-    <div
-      className={`p-3 ${
-        isPreview ? "" : "border border-dashed border-gray-300 rounded"
-      }`}
-    >
+    <div className="p-3">
       <h4 className="font-semibold">{content.degree}</h4>
       <p className="text-sm text-gray-600">
         {content.school} • {content.location}

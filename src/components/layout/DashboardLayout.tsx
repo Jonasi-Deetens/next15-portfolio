@@ -75,7 +75,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false); // Load user settings
-  // @ts-expect-error - tRPC type issue
+  // @ts-expect-error - tRPC type instantiation issue
   const { data: userSettings } = trpc.user.getSettings.useQuery();
 
   // Filter navigation based on user settings
@@ -85,9 +85,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
     // Check if the feature is enabled in user settings
     if (item.settingKey && userSettings) {
-      return (
-        (userSettings as Record<string, boolean>)[item.settingKey] === true
-      );
+      const settingValue = (userSettings as Record<string, boolean>)[
+        item.settingKey
+      ];
+      // Default to true if setting is not explicitly set to false
+      return settingValue !== false;
     }
 
     // Default to showing if no settings data yet

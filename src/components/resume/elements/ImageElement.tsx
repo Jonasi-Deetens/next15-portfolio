@@ -11,23 +11,15 @@ export function ImageElement({
   isPreview = false,
 }: ImageElementProps) {
   return (
-    <div
-      className={`p-2 text-center ${
-        isPreview ? "" : "border border-dashed border-gray-300 rounded"
-      }`}
-    >
+    <div className="p-2 w-full h-full flex items-center justify-center">
       {content.src ? (
         <img
           src={content.src}
           alt={content.alt}
-          style={{ width: content.width, height: content.height }}
-          className="rounded object-cover mx-auto"
+          className="w-full h-full rounded object-cover"
         />
       ) : (
-        <div
-          className="flex items-center justify-center bg-gray-100 rounded"
-          style={{ width: content.width, height: content.height }}
-        >
+        <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded">
           <ImageIcon className="w-8 h-8 text-gray-400" />
         </div>
       )}

@@ -7,7 +7,6 @@ import { SkillElement } from "./elements/SkillElement";
 import { ContactElement } from "./elements/ContactElement";
 import { ShapeElement } from "./elements/ShapeElement";
 import { LineElement } from "./elements/LineElement";
-import { CurveElement } from "./elements/CurveElement";
 
 interface ResumeElementRendererProps {
   element: ResumeElement;
@@ -37,8 +36,6 @@ export function ResumeElementRenderer({
       return <ShapeElement content={content} isPreview={isPreview} />;
     case "line":
       return <LineElement content={content} isPreview={isPreview} />;
-    case "curve":
-      return <CurveElement content={content} isPreview={isPreview} />;
     default:
       return <div>Unknown element</div>;
   }

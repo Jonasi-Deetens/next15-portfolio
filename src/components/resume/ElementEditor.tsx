@@ -65,8 +65,6 @@ const getValidationSchema = (type: string) => {
       return Yup.object({
         src: Yup.string().url("Invalid URL").required("Image URL is required"),
         alt: Yup.string().required("Alt text is required"),
-        width: Yup.number().min(50).max(500).required(),
-        height: Yup.number().min(50).max(500).required(),
       });
     case "shape":
       return Yup.object({
@@ -74,7 +72,6 @@ const getValidationSchema = (type: string) => {
           .oneOf(["triangle", "circle", "square", "diamond", "star"])
           .required(),
         color: Yup.string().required(),
-        size: Yup.number().min(10).max(200).required(),
         rotation: Yup.number().min(0).max(360).required(),
       });
     case "line":
@@ -82,18 +79,7 @@ const getValidationSchema = (type: string) => {
         style: Yup.string().oneOf(["solid", "dashed", "dotted"]).required(),
         color: Yup.string().required(),
         thickness: Yup.number().min(1).max(20).required(),
-        length: Yup.number().min(20).max(500).required(),
         angle: Yup.number().min(0).max(360).required(),
-      });
-    case "curve":
-      return Yup.object({
-        style: Yup.string()
-          .oneOf(["wave", "sine", "zigzag", "spiral"])
-          .required(),
-        color: Yup.string().required(),
-        thickness: Yup.number().min(1).max(10).required(),
-        amplitude: Yup.number().min(5).max(100).required(),
-        frequency: Yup.number().min(1).max(10).required(),
       });
     default:
       return Yup.object({});
@@ -155,10 +141,6 @@ export function ElementEditor({
               <>
                 <FormikInput name="src" label="Image URL" />
                 <FormikInput name="alt" label="Alt Text" />
-                <div className="grid grid-cols-2 gap-2">
-                  <FormikInput name="width" label="Width" type="number" />
-                  <FormikInput name="height" label="Height" type="number" />
-                </div>
               </>
             )}
 
@@ -237,7 +219,6 @@ export function ElementEditor({
                   ]}
                 />
                 <FormikInput name="color" label="Color" placeholder="#10b981" />
-                <FormikInput name="size" label="Size (px)" type="number" />
                 <FormikInput
                   name="rotation"
                   label="Rotation (degrees)"
@@ -263,39 +244,11 @@ export function ElementEditor({
                   label="Thickness (px)"
                   type="number"
                 />
-                <FormikInput name="length" label="Length (px)" type="number" />
                 <FormikInput
                   name="angle"
                   label="Angle (degrees)"
                   type="number"
                 />
-              </>
-            )}
-
-            {type === "curve" && (
-              <>
-                <FormikSelect
-                  name="style"
-                  label="Curve Style"
-                  options={[
-                    { value: "wave", label: "Wave" },
-                    { value: "sine", label: "Sine" },
-                    { value: "zigzag", label: "Zigzag" },
-                    { value: "spiral", label: "Spiral" },
-                  ]}
-                />
-                <FormikInput name="color" label="Color" placeholder="#10b981" />
-                <FormikInput
-                  name="thickness"
-                  label="Thickness (px)"
-                  type="number"
-                />
-                <FormikInput
-                  name="amplitude"
-                  label="Amplitude (px)"
-                  type="number"
-                />
-                <FormikInput name="frequency" label="Frequency" type="number" />
               </>
             )}
           </Form>

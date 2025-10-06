@@ -52,10 +52,13 @@ export default function SettingsPage() {
   // @ts-expect-error - tRPC type issue
   const userSettingsQuery = trpc.user.getSettings.useQuery();
   const userSettings = userSettingsQuery.data as UserSettings | undefined;
+  const utils = trpc.useUtils();
   const updateSettingsMutation = trpc.user.updateSettings.useMutation({
     onSuccess: () => {
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
+      // Invalidate the getSettings query to refresh the navigation
+      utils.user.getSettings.invalidate();
     },
   });
 
@@ -70,6 +73,21 @@ export default function SettingsPage() {
         network: settingsData.network ?? false,
         emailNotifications: settingsData.emailNotifications ?? true,
         darkMode: settingsData.darkMode ?? false,
+      });
+    } else {
+      // If no user settings exist, set defaults and save them
+      const defaultSettings = {
+        portfolioBuilder: true,
+        resumeBuilder: true,
+        analytics: false,
+        network: false,
+        emailNotifications: true,
+        darkMode: false,
+      };
+      setSettings(defaultSettings);
+      // Save default settings to database
+      updateSettingsMutation.mutate({
+        settings: defaultSettings,
       });
     }
   }, [userSettings]);

@@ -1,9 +1,9 @@
-import { useState, useRef, useCallback, useMemo } from "react";
-import { ResumeElement } from "@/types/resume";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { ResumeElement, ResumeElementType } from "@/types/resume";
 import { getDefaultContent } from "@/constants/resume";
 import { trpc } from "@/lib/trpc-client";
 
-export function useResumeBuilder(currentResume?: any) {
+export function useResumeBuilder(resumeId?: string) {
   const [elements, setElements] = useState<ResumeElement[]>([]);
   const [editingElement, setEditingElement] = useState<ResumeElement | null>(
     null
@@ -21,23 +21,101 @@ export function useResumeBuilder(currentResume?: any) {
     startPosition: { x: number; y: number };
   } | null>(null);
 
+  const [rotatingElement, setRotatingElement] = useState<string | null>(null);
+  const [rotationStartPos, setRotationStartPos] = useState({ x: 0, y: 0 });
+  const [rotationStartAngle, setRotationStartAngle] = useState(0);
+
   const createResumeMutation = trpc.resume.create.useMutation();
   const updateResumeMutation = trpc.resume.update.useMutation();
+  const { data: myResumes, isLoading } = trpc.resume.getMyResumes.useQuery();
 
-  useMemo(() => {
+  // Fetch the specific resume if resumeId is provided
+  const { data: currentResume, isLoading: isLoadingResume } =
+    trpc.resume.getById.useQuery({ id: resumeId }, { enabled: !!resumeId });
+
+  useEffect(() => {
+    console.log("useResumeBuilder: currentResume changed", currentResume);
     if (currentResume?.elements) {
       try {
         const resumeElements = Array.isArray(currentResume.elements)
           ? currentResume.elements
           : [];
-        setElements(resumeElements as unknown as ResumeElement[]);
+        console.log("useResumeBuilder: loading elements", resumeElements);
+        setElements((prevElements) => {
+          // Preserve selection state when updating elements
+          const newElements = resumeElements as unknown as ResumeElement[];
+          return newElements.map((newEl) => {
+            const existingEl = prevElements.find((el) => el.id === newEl.id);
+            return existingEl
+              ? { ...newEl, isSelected: existingEl.isSelected }
+              : newEl;
+          });
+        });
       } catch (error) {
+        console.error("useResumeBuilder: error loading elements", error);
         setElements([]);
       }
     } else {
+      console.log("useResumeBuilder: no elements found, clearing");
       setElements([]);
     }
   }, [currentResume]);
+
+  const updateElement = (id: string, updates: Partial<ResumeElement>) => {
+    setElements((prevElements) =>
+      prevElements.map((el) => (el.id === id ? { ...el, ...updates } : el))
+    );
+  };
+
+  // Handle rotation mouse tracking
+  useEffect(() => {
+    if (!rotatingElement) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const element = elements.find((el) => el.id === rotatingElement);
+      if (!element) return;
+
+      // Get canvas position to convert screen coordinates to canvas coordinates
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
+      const canvasRect = canvas.getBoundingClientRect();
+      const currentX = e.clientX - canvasRect.left;
+      const currentY = e.clientY - canvasRect.top;
+
+      const centerX = element.position.x + element.size.width / 2;
+      const centerY = element.position.y + element.size.height / 2;
+
+      const startAngle = Math.atan2(
+        rotationStartPos.y - centerY,
+        rotationStartPos.x - centerX
+      );
+      const currentAngle = Math.atan2(currentY - centerY, currentX - centerX);
+
+      const rotationDelta = (currentAngle - startAngle) * (180 / Math.PI);
+      const newRotation = (rotationStartAngle + rotationDelta) % 360;
+
+      updateElement(rotatingElement, { rotation: newRotation });
+    };
+
+    const handleMouseUp = () => {
+      setRotatingElement(null);
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [
+    rotatingElement,
+    rotationStartPos,
+    rotationStartAngle,
+    elements,
+    updateElement,
+  ]);
 
   const handleSidebarMouseDown = (e: React.MouseEvent, elementType: string) => {
     e.preventDefault();
@@ -48,24 +126,60 @@ export function useResumeBuilder(currentResume?: any) {
     });
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "copy";
-  };
-
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
   };
 
-  const updateElement = (id: string, updates: Partial<ResumeElement>) => {
-    setElements(
-      elements.map((el) => (el.id === id ? { ...el, ...updates } : el))
-    );
+  const selectElement = (element: ResumeElement) => {
+    setElements((prevElements) => {
+      const updated = prevElements.map((el) => ({
+        ...el,
+        isSelected: element.id ? el.id === element.id : false,
+      }));
+      return updated;
+    });
   };
 
   const deleteElement = (id: string) => {
-    setElements(elements.filter((el) => el.id !== id));
+    setElements((prevElements) => prevElements.filter((el) => el.id !== id));
     setEditingElement(null);
+  };
+
+  const bringToFront = (id: string) => {
+    setElements((prevElements) => {
+      const element = prevElements.find((el) => el.id === id);
+      if (!element) return prevElements;
+
+      const otherElements = prevElements.filter((el) => el.id !== id);
+      return [...otherElements, element];
+    });
+  };
+
+  const sendToBack = (id: string) => {
+    setElements((prevElements) => {
+      const element = prevElements.find((el) => el.id === id);
+      if (!element) return prevElements;
+
+      const otherElements = prevElements.filter((el) => el.id !== id);
+      return [element, ...otherElements];
+    });
+  };
+
+  const rotateElement = (id: string, e: React.MouseEvent) => {
+    const element = elements.find((el) => el.id === id);
+    if (!element) return;
+
+    // Get canvas position to convert screen coordinates to canvas coordinates
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const canvasRect = canvas.getBoundingClientRect();
+    const startX = e.clientX - canvasRect.left;
+    const startY = e.clientY - canvasRect.top;
+
+    setRotatingElement(id);
+    setRotationStartPos({ x: startX, y: startY });
+    setRotationStartAngle(element.rotation || 0);
   };
 
   const editElement = (element: ResumeElement) => {
@@ -119,8 +233,8 @@ export function useResumeBuilder(currentResume?: any) {
     });
 
     setDraggedElement(element);
-    setElements(
-      elements.map((el) =>
+    setElements((prevElements) =>
+      prevElements.map((el) =>
         el.id === element.id ? { ...el, isDragging: true } : el
       )
     );
@@ -174,8 +288,10 @@ export function useResumeBuilder(currentResume?: any) {
           } else {
             const previewElement: ResumeElement = {
               id: `preview-${Date.now()}`,
-              type: draggingFromSidebar.elementType as any,
-              content: getDefaultContent(draggingFromSidebar.elementType),
+              type: draggingFromSidebar.elementType as ResumeElementType,
+              content: getDefaultContent(
+                draggingFromSidebar.elementType as ResumeElementType
+              ),
               position: { x, y },
               size: { width: 200, height: 100 },
               isPreview: true,
@@ -190,8 +306,8 @@ export function useResumeBuilder(currentResume?: any) {
 
   const handleElementMouseUp = (e?: MouseEvent) => {
     if (draggedElement) {
-      setElements(
-        elements.map((el) =>
+      setElements((prevElements) =>
+        prevElements.map((el) =>
           el.id === draggedElement.id ? { ...el, isDragging: false } : el
         )
       );
@@ -227,8 +343,10 @@ export function useResumeBuilder(currentResume?: any) {
 
           const newElement: ResumeElement = {
             id: Date.now().toString(),
-            type: draggingFromSidebar.elementType as any,
-            content: getDefaultContent(draggingFromSidebar.elementType),
+            type: draggingFromSidebar.elementType as ResumeElementType,
+            content: getDefaultContent(
+              draggingFromSidebar.elementType as ResumeElementType
+            ),
             position: { x, y },
             size: { width: 200, height: 100 },
           };
@@ -265,8 +383,8 @@ export function useResumeBuilder(currentResume?: any) {
 
         const previewElement: ResumeElement = {
           id: `preview-${Date.now()}`,
-          type: elementType as any,
-          content: getDefaultContent(elementType),
+          type: elementType as ResumeElementType,
+          content: getDefaultContent(elementType as ResumeElementType),
           position: { x, y },
           size: { width: 200, height: 100 },
           isPreview: true,
@@ -290,6 +408,9 @@ export function useResumeBuilder(currentResume?: any) {
     updateElement,
     deleteElement,
     editElement,
+    bringToFront,
+    sendToBack,
+    rotateElement,
     closeEditor,
     togglePreview,
     handleElementMouseDown,
@@ -300,5 +421,8 @@ export function useResumeBuilder(currentResume?: any) {
     handleSidebarDragLeave,
     draggingFromSidebar,
     saveResume,
+    myResumes,
+    isLoading: isLoading || isLoadingResume,
+    selectElement,
   };
 }

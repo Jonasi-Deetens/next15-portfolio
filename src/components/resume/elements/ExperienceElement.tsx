@@ -11,9 +11,7 @@ export function ExperienceElement({
 }: ExperienceElementProps) {
   return (
     <div
-      className={`p-3 ${
-        isPreview ? "" : "border border-dashed border-gray-300 rounded"
-      }`}
+      className="p-3"
     >
       <h4 className="font-semibold">{content.title}</h4>
       <p className="text-sm text-gray-600">

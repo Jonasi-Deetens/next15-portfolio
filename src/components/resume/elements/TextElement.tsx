@@ -12,11 +12,18 @@ export function TextElement({ content, isPreview = false }: TextElementProps) {
         fontSize: content.fontSize,
         fontWeight: content.fontWeight,
       }}
-      className={`p-2 ${
-        isPreview ? "" : "border border-dashed border-gray-300 rounded"
-      }`}
+      className="p-2 w-full h-full overflow-hidden"
     >
-      {content.text}
+      <div
+        className="w-full h-full overflow-hidden"
+        style={{
+          wordWrap: "break-word",
+          overflowWrap: "break-word",
+          whiteSpace: "normal",
+        }}
+      >
+        {content.text}
+      </div>
     </div>
   );
 }

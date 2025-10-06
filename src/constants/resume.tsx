@@ -11,7 +11,11 @@ import {
   Quote,
   MoreHorizontal,
 } from "lucide-react";
-import { DraggableElement } from "@/types/resume";
+import {
+  DraggableElement,
+  ResumeElementContent,
+  ResumeElementType,
+} from "@/types/resume";
 
 export const draggableElements: DraggableElement[] = [
   {
@@ -62,15 +66,11 @@ export const draggableElements: DraggableElement[] = [
     icon: <Minus className="w-4 h-4" />,
     description: "Add decorative lines",
   },
-  {
-    type: "curve",
-    label: "Curve",
-    icon: <Quote className="w-4 h-4" />,
-    description: "Add curved elements",
-  },
 ];
 
-export const getDefaultContent = (type: string) => {
+export const getDefaultContent = (
+  type: ResumeElementType
+): ResumeElementContent => {
   switch (type) {
     case "text":
       return { text: "Your text here", fontSize: 16, fontWeight: "normal" };
@@ -118,14 +118,6 @@ export const getDefaultContent = (type: string) => {
         thickness: 2,
         length: 100,
         angle: 0,
-      };
-    case "curve":
-      return {
-        style: "wave",
-        color: "#10b981",
-        thickness: 2,
-        amplitude: 20,
-        frequency: 2,
       };
     default:
       return {};

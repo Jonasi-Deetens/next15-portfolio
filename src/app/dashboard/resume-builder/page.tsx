@@ -6,15 +6,19 @@ import { ResumeCanvas } from "@/components/resume/ResumeCanvas";
 import { ElementEditor } from "@/components/resume/ElementEditor";
 import { useResumeBuilder } from "@/hooks/useResumeBuilder";
 import { draggableElements } from "@/constants/resume";
-import { Eye, Save, FileText, Plus } from "lucide-react";
+import { Eye, Save, FileText } from "lucide-react";
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 export default function ResumeBuilderPage() {
   const [saveMessage, setSaveMessage] = useState<string>("");
+  const [selectedResumeId, setSelectedResumeId] = useState<string>("");
   const searchParams = useSearchParams();
-  const resumeId = searchParams.get("id");
+  const urlResumeId = searchParams.get("id");
+
+  // Initialize with URL parameter if available, otherwise use selected resume
+  const resumeId = urlResumeId || selectedResumeId;
 
   const {
     elements,
@@ -68,11 +72,7 @@ export default function ResumeBuilderPage() {
                 <select
                   value={resumeId || ""}
                   onChange={(e) => {
-                    if (e.target.value) {
-                      window.location.href = `/dashboard/resume-builder?id=${e.target.value}`;
-                    } else {
-                      window.location.href = "/dashboard/resume-builder";
-                    }
+                    setSelectedResumeId(e.target.value);
                   }}
                   className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 >
@@ -83,17 +83,17 @@ export default function ResumeBuilderPage() {
                     </option>
                   ))}
                 </select>
-                <Link href="/dashboard/resumes">
-                  <Button variant="outline" size="sm">
-                    <FileText className="w-4 h-4 mr-1" />
-                    Manage
-                  </Button>
-                </Link>
               </div>
             </div>
           )}
         </div>
         <div className="flex gap-3">
+          <Link href="/dashboard/resumes">
+            <Button variant="outline">
+              <FileText className="w-4 h-4 mr-2" />
+              Resumes
+            </Button>
+          </Link>
           <Button
             onClick={togglePreview}
             variant={isPreview ? "default" : "outline"}
@@ -143,8 +143,8 @@ export default function ResumeBuilderPage() {
             onElementMouseDown={handleElementMouseDown}
             onElementMouseMove={handleElementMouseMove}
             onElementMouseUp={handleElementMouseUp}
-            onSidebarDragOver={handleSidebarDragOver}
             onSidebarDragLeave={handleSidebarDragLeave}
+            onElementUpdate={updateElement}
             draggingFromSidebar={draggingFromSidebar}
           />
         </div>
