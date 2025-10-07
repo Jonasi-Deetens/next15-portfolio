@@ -99,7 +99,7 @@ export function ElementEditor({
 
   const handleSubmit = (values: Record<string, unknown>) => {
     onUpdate(element.id, { content: values });
-    onClose(); // Close modal on save
+    onClose();
   };
 
   const handleDelete = () => {

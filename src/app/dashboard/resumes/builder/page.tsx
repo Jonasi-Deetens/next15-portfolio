@@ -6,7 +6,7 @@ import { ResumeCanvas } from "@/components/resume/ResumeCanvas";
 import { ElementEditor } from "@/components/resume/ElementEditor";
 import { useResumeBuilder } from "@/hooks/useResumeBuilder";
 import { draggableElements } from "@/constants/resume";
-import { Eye, Save, FileText } from "lucide-react";
+import { Eye, Save, FileText, Grid3X3, AlignLeft } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -17,14 +17,12 @@ export default function ResumeBuilderPage() {
   const searchParams = useSearchParams();
   const urlResumeId = searchParams.get("resumeId");
 
-  // Initialize with URL parameter if available
   useEffect(() => {
     if (urlResumeId) {
       setSelectedResumeId(urlResumeId);
     }
   }, [urlResumeId]);
 
-  // Use selectedResumeId as the primary source
   const resumeId = selectedResumeId;
 
   const {
@@ -51,6 +49,12 @@ export default function ResumeBuilderPage() {
     saveResume,
     isLoading,
     myResumes,
+    selectedElementId,
+    deselectElement,
+    snapToGrid,
+    toggleSnapToGrid,
+    snapToElements,
+    toggleSnapToElements,
   } = useResumeBuilder(resumeId || undefined);
 
   const handleSave = async () => {
@@ -105,6 +109,22 @@ export default function ResumeBuilderPage() {
             </Button>
           </Link>
           <Button
+            onClick={toggleSnapToGrid}
+            variant={snapToGrid ? "default" : "outline"}
+            title="Toggle snap to grid"
+          >
+            <Grid3X3 className="w-4 h-4 mr-2" />
+            Grid
+          </Button>
+          <Button
+            onClick={toggleSnapToElements}
+            variant={snapToElements ? "default" : "outline"}
+            title="Toggle snap to elements"
+          >
+            <AlignLeft className="w-4 h-4 mr-2" />
+            Align
+          </Button>
+          <Button
             onClick={togglePreview}
             variant={isPreview ? "default" : "outline"}
           >
@@ -158,7 +178,11 @@ export default function ResumeBuilderPage() {
             onElementMouseUp={handleElementMouseUp}
             onSidebarDragLeave={handleSidebarDragLeave}
             onElementUpdate={updateElement}
+            selectedElementId={selectedElementId}
+            onDeselectElement={deselectElement}
             draggingFromSidebar={draggingFromSidebar}
+            snapToGrid={snapToGrid}
+            snapToElements={snapToElements}
           />
         </div>
       </div>

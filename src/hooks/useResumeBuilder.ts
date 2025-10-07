@@ -24,25 +24,72 @@ export function useResumeBuilder(resumeId?: string) {
   const [rotatingElement, setRotatingElement] = useState<string | null>(null);
   const [rotationStartPos, setRotationStartPos] = useState({ x: 0, y: 0 });
   const [rotationStartAngle, setRotationStartAngle] = useState(0);
+  const [selectedElementId, setSelectedElementId] = useState<string | null>(
+    null
+  );
+  const [snapToGrid, setSnapToGrid] = useState(false);
+  const [snapToElements, setSnapToElements] = useState(false);
+
+  const GRID_SIZE = 10;
+
+  const snapToGridValue = (value: number) => {
+    if (!snapToGrid) return value;
+    return Math.round(value / GRID_SIZE) * GRID_SIZE;
+  };
+
+  const SNAP_THRESHOLD = 8;
+
+  const snapToElementsValue = (
+    value: number,
+    axis: "x" | "y",
+    currentElementId: string
+  ) => {
+    if (!snapToElements) return value;
+
+    const otherElements = elements.filter((el) => el.id !== currentElementId);
+    if (otherElements.length === 0) return value;
+
+    let snapValue = value;
+    let minDistance = Infinity;
+
+    for (const element of otherElements) {
+      const elementPos = axis === "x" ? element.position.x : element.position.y;
+      const elementSize =
+        axis === "x" ? element.size.width : element.size.height;
+
+      // Check alignment with element edges
+      const edges = [
+        elementPos, // left/top edge
+        elementPos + elementSize, // right/bottom edge
+        elementPos + elementSize / 2, // center
+      ];
+
+      for (const edge of edges) {
+        const distance = Math.abs(value - edge);
+        if (distance < SNAP_THRESHOLD && distance < minDistance) {
+          snapValue = edge;
+          minDistance = distance;
+        }
+      }
+    }
+
+    return snapValue;
+  };
 
   const createResumeMutation = trpc.resume.create.useMutation();
   const updateResumeMutation = trpc.resume.update.useMutation();
   const { data: myResumes, isLoading } = trpc.resume.getMyResumes.useQuery();
 
-  // Fetch the specific resume if resumeId is provided
   const { data: currentResume, isLoading: isLoadingResume } =
     trpc.resume.getById.useQuery({ id: resumeId }, { enabled: !!resumeId });
 
   useEffect(() => {
-    console.log("useResumeBuilder: currentResume changed", currentResume);
     if (currentResume?.elements) {
       try {
         const resumeElements = Array.isArray(currentResume.elements)
           ? currentResume.elements
           : [];
-        console.log("useResumeBuilder: loading elements", resumeElements);
         setElements((prevElements) => {
-          // Preserve selection state when updating elements
           const newElements = resumeElements as unknown as ResumeElement[];
           return newElements.map((newEl) => {
             const existingEl = prevElements.find((el) => el.id === newEl.id);
@@ -52,11 +99,9 @@ export function useResumeBuilder(resumeId?: string) {
           });
         });
       } catch (error) {
-        console.error("useResumeBuilder: error loading elements", error);
         setElements([]);
       }
     } else {
-      console.log("useResumeBuilder: no elements found, clearing");
       setElements([]);
     }
   }, [currentResume]);
@@ -67,7 +112,6 @@ export function useResumeBuilder(resumeId?: string) {
     );
   };
 
-  // Handle rotation mouse tracking
   useEffect(() => {
     if (!rotatingElement) return;
 
@@ -75,7 +119,6 @@ export function useResumeBuilder(resumeId?: string) {
       const element = elements.find((el) => el.id === rotatingElement);
       if (!element) return;
 
-      // Get canvas position to convert screen coordinates to canvas coordinates
       const canvas = canvasRef.current;
       if (!canvas) return;
 
@@ -169,7 +212,6 @@ export function useResumeBuilder(resumeId?: string) {
     const element = elements.find((el) => el.id === id);
     if (!element) return;
 
-    // Get canvas position to convert screen coordinates to canvas coordinates
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -192,6 +234,14 @@ export function useResumeBuilder(resumeId?: string) {
 
   const togglePreview = () => {
     setIsPreview(!isPreview);
+  };
+
+  const toggleSnapToGrid = () => {
+    setSnapToGrid(!snapToGrid);
+  };
+
+  const toggleSnapToElements = () => {
+    setSnapToElements(!snapToElements);
   };
 
   const saveResume = useCallback(async () => {
@@ -221,6 +271,9 @@ export function useResumeBuilder(resumeId?: string) {
 
     e.preventDefault();
     e.stopPropagation();
+
+    setSelectedElementId(element.id);
+
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) return;
 
@@ -249,10 +302,22 @@ export function useResumeBuilder(resumeId?: string) {
         const rect = canvasRef.current?.getBoundingClientRect();
         if (!rect) return;
 
-        const newX = e.clientX - rect.left - dragOffset.x;
-        const newY = e.clientY - rect.top - dragOffset.y;
+        const rawX = e.clientX - rect.left - dragOffset.x;
+        const rawY = e.clientY - rect.top - dragOffset.y;
 
-        // Allow free movement - no boundary constraints
+        let newX = rawX;
+        let newY = rawY;
+
+        if (snapToGrid) {
+          newX = snapToGridValue(rawX);
+          newY = snapToGridValue(rawY);
+        }
+
+        if (snapToElements) {
+          newX = snapToElementsValue(newX, "x", draggedElement.id);
+          newY = snapToElementsValue(newY, "y", draggedElement.id);
+        }
+
         currentPositionRef.current = { x: newX, y: newY };
         setElements((prevElements) =>
           prevElements.map((el) =>
@@ -267,8 +332,21 @@ export function useResumeBuilder(resumeId?: string) {
         const rect = canvasRef.current?.getBoundingClientRect();
         if (!rect) return;
 
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        const rawX = e.clientX - rect.left;
+        const rawY = e.clientY - rect.top;
+
+        let x = rawX;
+        let y = rawY;
+
+        if (snapToGrid) {
+          x = snapToGridValue(rawX);
+          y = snapToGridValue(rawY);
+        }
+
+        if (snapToElements) {
+          x = snapToElementsValue(x, "x", "preview");
+          y = snapToElementsValue(y, "y", "preview");
+        }
 
         setElements((prevElements) => {
           const hasPreview = prevElements.some((el) => el.isPreview);
@@ -330,8 +408,21 @@ export function useResumeBuilder(resumeId?: string) {
         const minDragDistance = 10;
 
         if (isOverCanvas && dragDistance >= minDragDistance) {
-          const x = mouseX - canvasLeft;
-          const y = mouseY - canvasTop;
+          const rawX = mouseX - canvasLeft;
+          const rawY = mouseY - canvasTop;
+
+          let x = rawX;
+          let y = rawY;
+
+          if (snapToGrid) {
+            x = snapToGridValue(rawX);
+            y = snapToGridValue(rawY);
+          }
+
+          if (snapToElements) {
+            x = snapToElementsValue(x, "x", "new");
+            y = snapToElementsValue(y, "y", "new");
+          }
 
           const newElement: ResumeElement = {
             id: Date.now().toString(),
@@ -363,8 +454,21 @@ export function useResumeBuilder(resumeId?: string) {
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) return;
 
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const rawX = e.clientX - rect.left;
+    const rawY = e.clientY - rect.top;
+
+    let x = rawX;
+    let y = rawY;
+
+    if (snapToGrid) {
+      x = snapToGridValue(rawX);
+      y = snapToGridValue(rawY);
+    }
+
+    if (snapToElements) {
+      x = snapToElementsValue(x, "x", "preview");
+      y = snapToElementsValue(y, "y", "preview");
+    }
     const elementType = e.dataTransfer.getData("elementType");
 
     if (elementType) {
@@ -415,6 +519,12 @@ export function useResumeBuilder(resumeId?: string) {
     saveResume,
     myResumes,
     isLoading: isLoading || isLoadingResume,
-    selectElement,
+    selectedElementId,
+    selectElement: (id: string) => setSelectedElementId(id),
+    deselectElement: () => setSelectedElementId(null),
+    snapToGrid,
+    toggleSnapToGrid,
+    snapToElements,
+    toggleSnapToElements,
   };
 }

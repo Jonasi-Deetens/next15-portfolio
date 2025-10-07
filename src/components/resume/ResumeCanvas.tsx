@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Button } from "@/components/ui/Button";
 import { ResumeElementRenderer } from "./ResumeElementRenderer";
 import { TransformControls } from "./TransformControls";
+import { AlignmentGuides } from "./AlignmentGuides";
 import { ResumeElement } from "@/types/resume";
 import {
   Type,
@@ -27,10 +28,14 @@ interface ResumeCanvasProps {
   onBringToFront: (id: string) => void;
   onSendToBack: (id: string) => void;
   onRotateElement: (id: string, e: React.MouseEvent) => void;
+  selectedElementId: string | null;
+  onDeselectElement: () => void;
   draggingFromSidebar?: {
     elementType: string;
     startPosition: { x: number; y: number };
   } | null;
+  snapToGrid?: boolean;
+  snapToElements?: boolean;
 }
 
 export function ResumeCanvas({
@@ -48,7 +53,11 @@ export function ResumeCanvas({
   onBringToFront,
   onSendToBack,
   onRotateElement,
+  selectedElementId,
+  onDeselectElement,
   draggingFromSidebar,
+  snapToGrid = false,
+  snapToElements = false,
 }: ResumeCanvasProps) {
   useEffect(() => {
     const handleGlobalMouseMove = (e: MouseEvent) => {
@@ -70,18 +79,7 @@ export function ResumeCanvas({
 
   return (
     <div className="space-y-4">
-      <div className="text-center">
-        <h2 className="text-2xl font-semibold text-gray-900">
-          {isPreview ? "Resume Preview" : "Resume Canvas"}
-        </h2>
-        <p className="text-sm text-gray-600 mt-1">
-          {isPreview
-            ? "This is how your resume will look"
-            : "Drag elements to build your resume"}
-        </p>
-      </div>
-
-      <div className="flex justify-center p-6 relative">
+      <div className="flex justify-center px-6 relative">
         <div
           ref={canvasRef}
           onDrop={isPreview ? undefined : onDrop}
@@ -134,6 +132,15 @@ export function ResumeCanvas({
                   onSidebarDragLeave();
                 }
           }
+          onClick={
+            isPreview
+              ? undefined
+              : (e) => {
+                  if (e.target === e.currentTarget) {
+                    onDeselectElement();
+                  }
+                }
+          }
         >
           {elements.length === 0 ? (
             <div className="flex items-center justify-center h-full text-gray-500">
@@ -171,87 +178,38 @@ export function ResumeCanvas({
                   transformOrigin: "center",
                 }}
                 onMouseDown={
-                  isPreview ? undefined : undefined // Let TransformControls handle all mouse events
+                  isPreview
+                    ? undefined
+                    : (e) => {
+                        e.stopPropagation();
+                        onElementMouseDown(e, element);
+                      }
                 }
               >
                 <ResumeElementRenderer
                   element={element}
                   isPreview={isPreview}
                 />
-
-                {!isPreview && !element.isPreview && (
-                  <div className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <div className="flex gap-1">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onBringToFront(element.id);
-                        }}
-                        className="h-6 w-6 p-0"
-                        title="Bring to front"
-                      >
-                        <ChevronUp className="w-3 h-3" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onSendToBack(element.id);
-                        }}
-                        className="h-6 w-6 p-0"
-                        title="Send to back"
-                      >
-                        <ChevronDown className="w-3 h-3" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onMouseDown={(e) => {
-                          e.stopPropagation();
-                          onRotateElement(element.id, e);
-                        }}
-                        className="h-6 w-6 p-0 cursor-grab active:cursor-grabbing"
-                        title="Rotate (hold and drag)"
-                      >
-                        <RotateCcw className="w-3 h-3" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onEditElement(element);
-                        }}
-                        className="h-6 w-6 p-0"
-                      >
-                        <Edit className="w-3 h-3" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDeleteElement(element.id);
-                        }}
-                        className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  </div>
-                )}
               </div>
             ))
           )}
         </div>
 
-        {/* Transform Controls - rendered outside canvas to avoid clipping */}
+        {!isPreview && snapToElements && selectedElementId && (
+          <AlignmentGuides
+            elements={elements}
+            currentElement={
+              elements.find((el) => el.id === selectedElementId) || null
+            }
+            snapToElements={snapToElements}
+          />
+        )}
+
         {!isPreview &&
+          selectedElementId &&
           elements.map((element) => {
-            if (element.isPreview) return null;
+            if (element.isPreview || element.id !== selectedElementId)
+              return null;
 
             return (
               <div key={`controls-${element.id}`} className="group">
@@ -260,26 +218,26 @@ export function ResumeCanvas({
                   onUpdate={(updates) => onElementUpdate(element.id, updates)}
                   onSelect={() => {}}
                   onElementMouseDown={onElementMouseDown}
+                  snapToGrid={snapToGrid}
                   style={{
                     position: "absolute",
                     left: `calc(50% - 105mm + ${element.position.x + 1}px)`,
-                    top: `calc(24px + ${element.position.y + 1}px)`,
+                    top: `calc(${element.position.y + 1}px)`,
                     zIndex: 1000,
                   }}
                 />
 
-                {/* Action buttons */}
                 <div
-                  className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute opacity-100 transition-opacity"
                   style={{
                     left: `calc(50% - 105mm + ${
-                      element.position.x + element.size.width - 2
+                      element.position.x + element.size.width + 8
                     }px)`,
-                    top: `calc(24px + ${element.position.y - 2}px)`,
+                    top: `calc(${element.position.y}px)`,
                     zIndex: 1001,
                   }}
                 >
-                  <div className="flex gap-1">
+                  <div className="flex flex-col gap-2">
                     <Button
                       size="sm"
                       variant="outline"

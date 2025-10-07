@@ -7,6 +7,7 @@ interface TransformControlsProps {
   onSelect: () => void;
   onElementMouseDown: (e: React.MouseEvent, element: ResumeElement) => void;
   style?: React.CSSProperties;
+  snapToGrid?: boolean;
 }
 
 export function TransformControls({
@@ -15,6 +16,7 @@ export function TransformControls({
   onSelect,
   onElementMouseDown,
   style,
+  snapToGrid = false,
 }: TransformControlsProps) {
   const [isResizing, setIsResizing] = useState(false);
   const [isRotating, setIsRotating] = useState(false);
@@ -26,7 +28,13 @@ export function TransformControls({
     rotation: 0,
   });
 
-  // Detect what type of interaction based on mouse position
+  const GRID_SIZE = 10;
+
+  const snapToGridValue = (value: number) => {
+    if (!snapToGrid) return value;
+    return Math.round(value / GRID_SIZE) * GRID_SIZE;
+  };
+
   const getInteractionType = useCallback((e: React.MouseEvent) => {
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -34,24 +42,21 @@ export function TransformControls({
     const width = rect.width;
     const height = rect.height;
 
-    const threshold = 6; // 6px threshold for corners and edges
+    const threshold = 6;
 
-    // Check if we're in corner areas
     const isInCorner =
-      (x < threshold && y < threshold) || // top-left
-      (x > width - threshold && y < threshold) || // top-right
-      (x < threshold && y > height - threshold) || // bottom-left
-      (x > width - threshold && y > height - threshold); // bottom-right
+      (x < threshold && y < threshold) ||
+      (x > width - threshold && y < threshold) ||
+      (x < threshold && y > height - threshold) ||
+      (x > width - threshold && y > height - threshold);
 
-    // Check if we're on edges
     const isOnEdge =
-      x < threshold || // left edge
-      x > width - threshold || // right edge
-      y < threshold || // top edge
-      y > height - threshold; // bottom edge
+      x < threshold ||
+      x > width - threshold ||
+      y < threshold ||
+      y > height - threshold;
 
     if (isInCorner) {
-      // Determine which corner
       if (x < threshold && y < threshold)
         return { type: "corner", handle: "nw" };
       if (x > width - threshold && y < threshold)
@@ -63,14 +68,12 @@ export function TransformControls({
     }
 
     if (isOnEdge) {
-      // Determine which edge
       if (x < threshold) return { type: "edge", handle: "w" };
       if (x > width - threshold) return { type: "edge", handle: "e" };
       if (y < threshold) return { type: "edge", handle: "n" };
       if (y > height - threshold) return { type: "edge", handle: "s" };
     }
 
-    // Always allow dragging from anywhere on the element
     return { type: "move", handle: null };
   }, []);
 
@@ -82,7 +85,7 @@ export function TransformControls({
       const interaction = getInteractionType(e);
 
       if (interaction.type === "corner") {
-        const shouldRotate = e.altKey || e.metaKey; // Alt/Cmd for rotation
+        const shouldRotate = e.altKey || e.metaKey;
 
         if (shouldRotate) {
           setIsRotating(true);
@@ -94,9 +97,8 @@ export function TransformControls({
         setResizeHandle(interaction.handle);
         setIsResizing(true);
       } else if (interaction.type === "move") {
-        // Handle dragging - call the parent's drag handler
         onElementMouseDown(e, element);
-        return; // Let the parent handle the dragging
+        return;
       }
 
       setStartMousePos({ x: e.clientX, y: e.clientY });
@@ -118,17 +120,15 @@ export function TransformControls({
         let newSize = { ...startElementData.size };
         let newPosition = { ...startElementData.position };
 
-        // Check if this is a corner or edge resize
         const isCorner = ["nw", "ne", "sw", "se"].includes(resizeHandle);
         const isEdge = ["n", "s", "e", "w"].includes(resizeHandle);
 
         if (isCorner) {
-          // For corners, use free resizing (independent X and Y scaling)
           let scaleX = 1;
           let scaleY = 1;
 
           switch (resizeHandle) {
-            case "se": // Southeast - resize from northwest corner
+            case "se":
               scaleX =
                 (startElementData.size.width + deltaX) /
                 startElementData.size.width;
@@ -136,7 +136,7 @@ export function TransformControls({
                 (startElementData.size.height + deltaY) /
                 startElementData.size.height;
               break;
-            case "sw": // Southwest - resize from northeast corner
+            case "sw":
               scaleX =
                 (startElementData.size.width - deltaX) /
                 startElementData.size.width;
@@ -144,7 +144,7 @@ export function TransformControls({
                 (startElementData.size.height + deltaY) /
                 startElementData.size.height;
               break;
-            case "ne": // Northeast - resize from southwest corner
+            case "ne":
               scaleX =
                 (startElementData.size.width + deltaX) /
                 startElementData.size.width;
@@ -152,7 +152,7 @@ export function TransformControls({
                 (startElementData.size.height - deltaY) /
                 startElementData.size.height;
               break;
-            case "nw": // Northwest - resize from southeast corner
+            case "nw":
               scaleX =
                 (startElementData.size.width - deltaX) /
                 startElementData.size.width;
@@ -162,31 +162,33 @@ export function TransformControls({
               break;
           }
 
-          // Use individual scale factors for free resizing
           newSize = {
-            width: Math.max(20, startElementData.size.width * scaleX),
-            height: Math.max(20, startElementData.size.height * scaleY),
+            width: snapToGridValue(
+              Math.max(20, startElementData.size.width * scaleX)
+            ),
+            height: snapToGridValue(
+              Math.max(20, startElementData.size.height * scaleY)
+            ),
           };
 
-          // Calculate new position to keep the opposite corner fixed
           switch (resizeHandle) {
-            case "se": // Southeast - keep northwest corner fixed
+            case "se":
               newPosition.x = startElementData.position.x;
               newPosition.y = startElementData.position.y;
               break;
-            case "sw": // Southwest - keep northeast corner fixed
+            case "sw":
               newPosition.x =
                 startElementData.position.x +
                 (startElementData.size.width - newSize.width);
               newPosition.y = startElementData.position.y;
               break;
-            case "ne": // Northeast - keep southwest corner fixed
+            case "ne":
               newPosition.x = startElementData.position.x;
               newPosition.y =
                 startElementData.position.y +
                 (startElementData.size.height - newSize.height);
               break;
-            case "nw": // Northwest - keep southeast corner fixed
+            case "nw":
               newPosition.x =
                 startElementData.position.x +
                 (startElementData.size.width - newSize.width);
@@ -196,39 +198,36 @@ export function TransformControls({
               break;
           }
         } else if (isEdge) {
-          // For edges, use simple delta calculations
           switch (resizeHandle) {
-            case "n": // North - only resize height, keep south edge fixed
-              newSize.height = Math.max(
-                20,
-                startElementData.size.height - deltaY
+            case "n":
+              newSize.height = snapToGridValue(
+                Math.max(20, startElementData.size.height - deltaY)
               );
-              newPosition.y =
+              newPosition.y = snapToGridValue(
                 startElementData.position.y +
-                (startElementData.size.height - newSize.height);
-              break;
-            case "s": // South - only resize height, keep north edge fixed
-              newSize.height = Math.max(
-                20,
-                startElementData.size.height + deltaY
+                  (startElementData.size.height - newSize.height)
               );
-              newPosition.y = startElementData.position.y;
               break;
-            case "e": // East - only resize width, keep west edge fixed
-              newSize.width = Math.max(
-                20,
-                startElementData.size.width + deltaX
+            case "s":
+              newSize.height = snapToGridValue(
+                Math.max(20, startElementData.size.height + deltaY)
               );
-              newPosition.x = startElementData.position.x;
+              newPosition.y = snapToGridValue(startElementData.position.y);
               break;
-            case "w": // West - only resize width, keep east edge fixed
-              newSize.width = Math.max(
-                20,
-                startElementData.size.width - deltaX
+            case "e":
+              newSize.width = snapToGridValue(
+                Math.max(20, startElementData.size.width + deltaX)
               );
-              newPosition.x =
+              newPosition.x = snapToGridValue(startElementData.position.x);
+              break;
+            case "w":
+              newSize.width = snapToGridValue(
+                Math.max(20, startElementData.size.width - deltaX)
+              );
+              newPosition.x = snapToGridValue(
                 startElementData.position.x +
-                (startElementData.size.width - newSize.width);
+                  (startElementData.size.width - newSize.width)
+              );
               break;
           }
         }
@@ -240,7 +239,6 @@ export function TransformControls({
       }
 
       if (isRotating) {
-        // Use center of element as rotation origin
         const centerX = element.position.x + element.size.width / 2;
         const centerY = element.position.y + element.size.height / 2;
 
@@ -272,7 +270,6 @@ export function TransformControls({
     ]
   );
 
-  // Handle cursor changes based on mouse position
   const handleMouseMoveOver = useCallback(
     (e: React.MouseEvent) => {
       const interaction = getInteractionType(e);
