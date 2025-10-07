@@ -10,9 +10,7 @@ export function ExperienceElement({
   isPreview = false,
 }: ExperienceElementProps) {
   return (
-    <div
-      className="p-3"
-    >
+    <div>
       <h4 className="font-semibold">{content.title}</h4>
       <p className="text-sm text-gray-600">
         {content.company} • {content.location}

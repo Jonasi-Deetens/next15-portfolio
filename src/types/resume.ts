@@ -68,6 +68,7 @@ export interface ImageData {
   alt: string;
   width: number;
   height: number;
+  rounded: boolean;
 }
 
 export interface SkillData {

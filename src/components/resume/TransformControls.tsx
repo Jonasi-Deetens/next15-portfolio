@@ -6,6 +6,7 @@ interface TransformControlsProps {
   onUpdate: (updates: Partial<ResumeElement>) => void;
   onSelect: () => void;
   onElementMouseDown: (e: React.MouseEvent, element: ResumeElement) => void;
+  style?: React.CSSProperties;
 }
 
 export function TransformControls({
@@ -13,6 +14,7 @@ export function TransformControls({
   onUpdate,
   onSelect,
   onElementMouseDown,
+  style,
 }: TransformControlsProps) {
   const [isResizing, setIsResizing] = useState(false);
   const [isRotating, setIsRotating] = useState(false);
@@ -34,7 +36,7 @@ export function TransformControls({
 
     const threshold = 6; // 6px threshold for corners and edges
 
-    // Check if we're in corner areas (with 5px offset)
+    // Check if we're in corner areas
     const isInCorner =
       (x < threshold && y < threshold) || // top-left
       (x > width - threshold && y < threshold) || // top-right
@@ -68,6 +70,7 @@ export function TransformControls({
       if (y > height - threshold) return { type: "edge", handle: "s" };
     }
 
+    // Always allow dragging from anywhere on the element
     return { type: "move", handle: null };
   }, []);
 
@@ -120,7 +123,7 @@ export function TransformControls({
         const isEdge = ["n", "s", "e", "w"].includes(resizeHandle);
 
         if (isCorner) {
-          // For corners, use simple delta calculations but maintain aspect ratio
+          // For corners, use free resizing (independent X and Y scaling)
           let scaleX = 1;
           let scaleY = 1;
 
@@ -159,12 +162,10 @@ export function TransformControls({
               break;
           }
 
-          // Use the average scale to maintain aspect ratio
-          const scale = (scaleX + scaleY) / 2;
-
+          // Use individual scale factors for free resizing
           newSize = {
-            width: Math.max(20, startElementData.size.width * scale),
-            height: Math.max(20, startElementData.size.height * scale),
+            width: Math.max(20, startElementData.size.width * scaleX),
+            height: Math.max(20, startElementData.size.height * scaleY),
           };
 
           // Calculate new position to keep the opposite corner fixed
@@ -342,12 +343,16 @@ export function TransformControls({
 
   return (
     <div
-      className="absolute inset-0 pointer-events-auto border border-dashed border-emerald-400"
+      className="absolute pointer-events-auto border border-dashed border-emerald-400"
       style={{
         left: 0,
         top: 0,
-        width: element.size.width,
-        height: element.size.height,
+        width: element.size.width + 2,
+        height: element.size.height + 2,
+        margin: 0,
+        padding: 0,
+        boxSizing: "border-box",
+        ...style,
       }}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMoveOver}

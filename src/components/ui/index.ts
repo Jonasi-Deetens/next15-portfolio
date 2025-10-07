@@ -14,3 +14,4 @@ export * from "./LoadingSpinner";
 // Formik Components
 export * from "./FormikInput";
 export * from "./FormikSelect";
+export * from "./FormikCheckbox";

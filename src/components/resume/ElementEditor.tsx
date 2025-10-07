@@ -6,7 +6,7 @@ import { ResumeElement } from "@/types/resume";
 import { Save, Trash2 } from "lucide-react";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
-import { FormikSelect } from "../ui";
+import { FormikSelect, FormikCheckbox } from "../ui";
 
 interface ElementEditorProps {
   element: ResumeElement | null;
@@ -65,6 +65,7 @@ const getValidationSchema = (type: string) => {
       return Yup.object({
         src: Yup.string().url("Invalid URL").required("Image URL is required"),
         alt: Yup.string().required("Alt text is required"),
+        rounded: Yup.boolean(),
       });
     case "shape":
       return Yup.object({
@@ -141,6 +142,7 @@ export function ElementEditor({
               <>
                 <FormikInput name="src" label="Image URL" />
                 <FormikInput name="alt" label="Alt Text" />
+                <FormikCheckbox name="rounded" label="Rounded corners" />
               </>
             )}
 
@@ -153,12 +155,7 @@ export function ElementEditor({
                   <FormikInput name="startDate" label="Start Date" />
                   <FormikInput name="endDate" label="End Date" />
                 </div>
-                <div className="flex items-center">
-                  <FormikInput name="current" type="checkbox" />
-                  <label className="ml-2 text-sm text-gray-700">
-                    Currently working here
-                  </label>
-                </div>
+                <FormikCheckbox name="current" label="Currently working here" />
                 <FormikTextarea
                   name="description"
                   label="Description"

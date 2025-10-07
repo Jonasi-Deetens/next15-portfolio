@@ -81,7 +81,7 @@ export function ResumeCanvas({
         </p>
       </div>
 
-      <div className="flex justify-center p-6">
+      <div className="flex justify-center p-6 relative">
         <div
           ref={canvasRef}
           onDrop={isPreview ? undefined : onDrop}
@@ -106,7 +106,7 @@ export function ResumeCanvas({
               : "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
             userSelect: "none",
             margin: "0 auto",
-            padding: "20mm",
+            overflow: "hidden",
           }}
           onDragEnter={
             isPreview
@@ -179,16 +179,6 @@ export function ResumeCanvas({
                   isPreview={isPreview}
                 />
 
-                {/* Transform Controls */}
-                {!isPreview && !element.isPreview && (
-                  <TransformControls
-                    element={element}
-                    onUpdate={(updates) => onElementUpdate(element.id, updates)}
-                    onSelect={() => {}}
-                    onElementMouseDown={onElementMouseDown}
-                  />
-                )}
-
                 {!isPreview && !element.isPreview && (
                   <div className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <div className="flex gap-1">
@@ -257,6 +247,102 @@ export function ResumeCanvas({
             ))
           )}
         </div>
+
+        {/* Transform Controls - rendered outside canvas to avoid clipping */}
+        {!isPreview &&
+          elements.map((element) => {
+            if (element.isPreview) return null;
+
+            return (
+              <div key={`controls-${element.id}`} className="group">
+                <TransformControls
+                  element={element}
+                  onUpdate={(updates) => onElementUpdate(element.id, updates)}
+                  onSelect={() => {}}
+                  onElementMouseDown={onElementMouseDown}
+                  style={{
+                    position: "absolute",
+                    left: `calc(50% - 105mm + ${element.position.x + 1}px)`,
+                    top: `calc(24px + ${element.position.y + 1}px)`,
+                    zIndex: 1000,
+                  }}
+                />
+
+                {/* Action buttons */}
+                <div
+                  className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                  style={{
+                    left: `calc(50% - 105mm + ${
+                      element.position.x + element.size.width - 2
+                    }px)`,
+                    top: `calc(24px + ${element.position.y - 2}px)`,
+                    zIndex: 1001,
+                  }}
+                >
+                  <div className="flex gap-1">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onBringToFront(element.id);
+                      }}
+                      className="h-6 w-6 p-0"
+                      title="Bring to front"
+                    >
+                      <ChevronUp className="w-3 h-3" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSendToBack(element.id);
+                      }}
+                      className="h-6 w-6 p-0"
+                      title="Send to back"
+                    >
+                      <ChevronDown className="w-3 h-3" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onMouseDown={(e) => {
+                        e.stopPropagation();
+                        onRotateElement(element.id, e);
+                      }}
+                      className="h-6 w-6 p-0 cursor-grab active:cursor-grabbing"
+                      title="Rotate (hold and drag)"
+                    >
+                      <RotateCcw className="w-3 h-3" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEditElement(element);
+                      }}
+                      className="h-6 w-6 p-0"
+                    >
+                      <Edit className="w-3 h-3" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeleteElement(element.id);
+                      }}
+                      className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
       </div>
     </div>
   );

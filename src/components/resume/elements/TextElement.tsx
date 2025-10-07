@@ -12,7 +12,7 @@ export function TextElement({ content, isPreview = false }: TextElementProps) {
         fontSize: content.fontSize,
         fontWeight: content.fontWeight,
       }}
-      className="p-2 w-full h-full overflow-hidden"
+      className="w-full h-full overflow-hidden"
     >
       <div
         className="w-full h-full overflow-hidden"

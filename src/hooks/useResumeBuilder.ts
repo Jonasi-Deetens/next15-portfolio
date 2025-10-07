@@ -252,20 +252,12 @@ export function useResumeBuilder(resumeId?: string) {
         const newX = e.clientX - rect.left - dragOffset.x;
         const newY = e.clientY - rect.top - dragOffset.y;
 
-        const constrainedX = Math.max(
-          0,
-          Math.min(newX, rect.width - draggedElement.size.width)
-        );
-        const constrainedY = Math.max(
-          0,
-          Math.min(newY, rect.height - draggedElement.size.height)
-        );
-
-        currentPositionRef.current = { x: constrainedX, y: constrainedY };
+        // Allow free movement - no boundary constraints
+        currentPositionRef.current = { x: newX, y: newY };
         setElements((prevElements) =>
           prevElements.map((el) =>
             el.id === draggedElement.id
-              ? { ...el, position: { x: constrainedX, y: constrainedY } }
+              ? { ...el, position: { x: newX, y: newY } }
               : el
           )
         );

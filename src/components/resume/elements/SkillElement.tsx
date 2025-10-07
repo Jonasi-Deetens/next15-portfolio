@@ -11,9 +11,7 @@ export function SkillElement({
   isPreview = false,
 }: SkillElementProps) {
   return (
-    <div
-      className="p-3"
-    >
+    <div>
       <h4 className="font-semibold mb-2">Skills</h4>
       <div className="flex flex-wrap gap-1">
         {content.skills.map((skill: string, index: number) => (

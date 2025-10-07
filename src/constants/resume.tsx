@@ -75,7 +75,13 @@ export const getDefaultContent = (
     case "text":
       return { text: "Your text here", fontSize: 16, fontWeight: "normal" };
     case "image":
-      return { src: "", alt: "Profile Image", width: 150, height: 150 };
+      return {
+        src: "",
+        alt: "Profile Image",
+        width: 150,
+        height: 150,
+        rounded: false,
+      };
     case "experience":
       return {
         title: "Job Title",
