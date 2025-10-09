@@ -11,6 +11,10 @@ export function TextElement({ content, isPreview = false }: TextElementProps) {
       style={{
         fontSize: content.fontSize,
         fontWeight: content.fontWeight,
+        color: content.color || "#374151",
+        textAlign: content.textAlign || "left",
+        fontFamily: content.fontFamily,
+        lineHeight: content.lineHeight || 1.5,
       }}
       className="w-full h-full overflow-hidden"
     >

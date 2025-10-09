@@ -6,10 +6,13 @@ import {
   Award,
   Phone,
   Minus,
-  Hash,
   Star,
-  Quote,
-  MoreHorizontal,
+  User,
+  FileText,
+  Code,
+  Globe,
+  Users,
+  Minus as Separator,
 } from "lucide-react";
 import {
   DraggableElement,
@@ -65,6 +68,48 @@ export const draggableElements: DraggableElement[] = [
     label: "Line",
     icon: <Minus className="w-4 h-4" />,
     description: "Add decorative lines",
+  },
+  {
+    type: "header",
+    label: "Header",
+    icon: <User className="w-4 h-4" />,
+    description: "Add name and title",
+  },
+  {
+    type: "summary",
+    label: "Summary",
+    icon: <FileText className="w-4 h-4" />,
+    description: "Add professional summary",
+  },
+  {
+    type: "projects",
+    label: "Projects",
+    icon: <Code className="w-4 h-4" />,
+    description: "Add project portfolio",
+  },
+  {
+    type: "certifications",
+    label: "Certifications",
+    icon: <Award className="w-4 h-4" />,
+    description: "Add professional certifications",
+  },
+  {
+    type: "languages",
+    label: "Languages",
+    icon: <Globe className="w-4 h-4" />,
+    description: "Add language skills",
+  },
+  {
+    type: "references",
+    label: "References",
+    icon: <Users className="w-4 h-4" />,
+    description: "Add professional references",
+  },
+  {
+    type: "divider",
+    label: "Divider",
+    icon: <Separator className="w-4 h-4" />,
+    description: "Add section dividers",
   },
 ];
 
@@ -125,7 +170,90 @@ export const getDefaultContent = (
         length: 100,
         angle: 0,
       };
+    case "header":
+      return {
+        name: "Your Name",
+        title: "Your Title",
+        subtitle: "Your Subtitle",
+        fontSize: 24,
+        fontWeight: "bold",
+        color: "#1f2937",
+        textAlign: "left",
+      };
+    case "summary":
+      return {
+        text: "Professional summary or objective statement",
+        fontSize: 14,
+        fontWeight: "normal",
+        color: "#374151",
+        textAlign: "left",
+        lineHeight: 1.5,
+      };
+    case "projects":
+      return {
+        projects: [
+          {
+            name: "Project Name",
+            description: "Project description",
+            technologies: ["Technology 1", "Technology 2"],
+            url: "",
+            github: "",
+            startDate: "2023",
+            endDate: "2023",
+          },
+        ],
+        showDates: true,
+        showTechnologies: true,
+      };
+    case "certifications":
+      return {
+        certifications: [
+          {
+            name: "Certification Name",
+            issuer: "Issuing Organization",
+            date: "2023",
+            credentialId: "",
+            url: "",
+          },
+        ],
+        showDates: true,
+        showCredentialIds: false,
+      };
+    case "languages":
+      return {
+        languages: [
+          {
+            name: "English",
+            proficiency: "native",
+          },
+          {
+            name: "Spanish",
+            proficiency: "intermediate",
+          },
+        ],
+        showProficiency: true,
+      };
+    case "references":
+      return {
+        references: [
+          {
+            name: "Reference Name",
+            title: "Job Title",
+            company: "Company Name",
+            phone: "",
+            email: "",
+          },
+        ],
+        showContact: false,
+      };
+    case "divider":
+      return {
+        style: "line",
+        color: "#d1d5db",
+        thickness: 1,
+        opacity: 0.5,
+      };
     default:
-      return {};
+      return {} as ResumeElementContent;
   }
 };

@@ -7,6 +7,13 @@ import { SkillElement } from "./elements/SkillElement";
 import { ContactElement } from "./elements/ContactElement";
 import { ShapeElement } from "./elements/ShapeElement";
 import { LineElement } from "./elements/LineElement";
+import { HeaderElement } from "./elements/HeaderElement";
+import { SummaryElement } from "./elements/SummaryElement";
+import { ProjectsElement } from "./elements/ProjectsElement";
+import { CertificationsElement } from "./elements/CertificationsElement";
+import { LanguagesElement } from "./elements/LanguagesElement";
+import { ReferencesElement } from "./elements/ReferencesElement";
+import { DividerElement } from "./elements/DividerElement";
 
 interface ResumeElementRendererProps {
   element: ResumeElement;
@@ -21,21 +28,45 @@ export function ResumeElementRenderer({
 
   switch (type) {
     case "text":
-      return <TextElement content={content} isPreview={isPreview} />;
+      return <TextElement content={content as any} isPreview={isPreview} />;
     case "image":
-      return <ImageElement content={content} isPreview={isPreview} />;
+      return <ImageElement content={content as any} isPreview={isPreview} />;
     case "experience":
-      return <ExperienceElement content={content} isPreview={isPreview} />;
+      return (
+        <ExperienceElement content={content as any} isPreview={isPreview} />
+      );
     case "education":
-      return <EducationElement content={content} isPreview={isPreview} />;
+      return (
+        <EducationElement content={content as any} isPreview={isPreview} />
+      );
     case "skill":
-      return <SkillElement content={content} isPreview={isPreview} />;
+      return <SkillElement content={content as any} isPreview={isPreview} />;
     case "contact":
-      return <ContactElement content={content} isPreview={isPreview} />;
+      return <ContactElement content={content as any} isPreview={isPreview} />;
     case "shape":
-      return <ShapeElement content={content} isPreview={isPreview} />;
+      return <ShapeElement content={content as any} isPreview={isPreview} />;
     case "line":
-      return <LineElement content={content} isPreview={isPreview} />;
+      return <LineElement content={content as any} isPreview={isPreview} />;
+    case "header":
+      return <HeaderElement content={content as any} isPreview={isPreview} />;
+    case "summary":
+      return <SummaryElement content={content as any} isPreview={isPreview} />;
+    case "projects":
+      return <ProjectsElement content={content as any} isPreview={isPreview} />;
+    case "certifications":
+      return (
+        <CertificationsElement content={content as any} isPreview={isPreview} />
+      );
+    case "languages":
+      return (
+        <LanguagesElement content={content as any} isPreview={isPreview} />
+      );
+    case "references":
+      return (
+        <ReferencesElement content={content as any} isPreview={isPreview} />
+      );
+    case "divider":
+      return <DividerElement content={content as any} isPreview={isPreview} />;
     default:
       return <div>Unknown element</div>;
   }

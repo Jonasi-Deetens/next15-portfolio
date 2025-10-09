@@ -1,4 +1,11 @@
-import { Phone, Mail, MapPin, ExternalLink } from "lucide-react";
+import {
+  Phone,
+  Mail,
+  MapPin,
+  ExternalLink,
+  Linkedin,
+  Github,
+} from "lucide-react";
 import { ContactData } from "@/types/resume";
 
 interface ContactElementProps {
@@ -36,6 +43,24 @@ export function ContactElement({
           <div className="flex items-center gap-2">
             <ExternalLink className="w-3 h-3" />
             {content.website}
+          </div>
+        )}
+        {content.linkedin && (
+          <div className="flex items-center gap-2">
+            <Linkedin className="w-3 h-3" />
+            {content.linkedin}
+          </div>
+        )}
+        {content.github && (
+          <div className="flex items-center gap-2">
+            <Github className="w-3 h-3" />
+            {content.github}
+          </div>
+        )}
+        {content.portfolio && (
+          <div className="flex items-center gap-2">
+            <ExternalLink className="w-3 h-3" />
+            {content.portfolio}
           </div>
         )}
       </div>
